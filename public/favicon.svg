@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>.surface{fill:#ecebe9}.neutral{stroke:#bdbdbd}@media(prefers-color-scheme:dark){.surface{fill:#343a40}.neutral{stroke:#858c93}}</style>
+  <rect class="surface" x="2" y="2" width="60" height="60" rx="17"/>
+  <circle cx="16" cy="17" r="4.5" fill="#ff9f1c"/>
+  <path class="neutral" d="M27 17h20" fill="none" stroke-width="6" stroke-linecap="round"/>
+  <path d="m23 27-7 6 7 6m18-12 7 6-7 6m-6-13-6 14" fill="none" stroke="#559bf4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="48" r="4.5" fill="#5acb31"/>
+  <path class="neutral" d="M27 48h20" fill="none" stroke-width="6" stroke-linecap="round"/>
+</svg>

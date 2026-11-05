@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.tsbuildinfo
+public/fonts/
+.DS_Store
+test-results/
+.wrangler/
+.env
+.env.*
+!.env.example
+*.log
+.agent/IDENTITY.local.md

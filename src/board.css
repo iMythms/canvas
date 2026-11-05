@@ -1,0 +1,374 @@
+.board-panel { display:flex;flex-direction:column;position:relative;background:var(--canvas-surface);color:var(--canvas-text);container-type:inline-size; }
+.board-drawing-toolbar { position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;width:max-content;max-width:calc(100% - 16px);padding:4px;border:1px solid var(--canvas-border);border-radius:var(--surface-radius);background:var(--canvas-surface);box-shadow:0 2px 5px #00000006,0 5px 18px #00000008;z-index:5; }
+.board-drawing-tools { display:flex;align-items:center;gap:2px;min-width:0; }
+.board-tool { width:var(--control-height);min-width:var(--control-height);height:var(--control-height);min-height:var(--control-height);padding:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:0;border-radius:var(--control-radius);background:transparent;color:var(--canvas-muted); }
+.board-tool:hover,.board-more[open]>summary { background:color-mix(in srgb,var(--canvas-accent) 7%,transparent);color:var(--canvas-text); }
+.board-tool[aria-pressed="true"],.board-tool[data-active="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); }
+@container (max-width:480px) { .board-more > summary[data-collapsed-active="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); } }
+@container (max-width:290px) { .board-more > summary[data-narrow-active="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); } }
+.board-tool:focus-visible { outline:2px solid var(--canvas-accent);outline-offset:2px; }
+.board-tool-divider { height:20px;width:1px;margin:0 3px;background:var(--canvas-border);flex-shrink:0; }
+.board-more { position:relative; }
+.board-more>summary { list-style:none;cursor:pointer; }
+.board-more>summary::-webkit-details-marker { display:none; }
+.board-more-tools { position:absolute;top:calc(100% + 10px);right:0;width:min(218px,calc(100cqw - 16px));max-height:max(0px,calc(var(--board-editor-height) - 92px));overflow-y:auto;overscroll-behavior:contain;padding:6px;border:1px solid var(--canvas-border);border-radius:var(--surface-radius);background:var(--canvas-surface);box-shadow:0 4px 10px #00000008,0 14px 36px #00000012; }
+.board-tool--expanded { width:100%;min-width:0;justify-content:flex-start;gap:10px;padding:0 10px;font-size:12px;text-align:left; }
+.board-tool--expanded>span { flex:1; }
+.board-more-divider { height:1px;margin:6px;background:var(--canvas-border); }
+.board-engine { flex:1;min-height:0;position:relative; }
+.board-panel .excalidraw,
+.excalidraw.excalidraw-modal-container {
+  --ui-font:var(--canvas-font,inherit);
+  --color-primary:var(--board-accent,var(--canvas-accent));
+  --color-slider-thumb:var(--color-primary);
+  --color-slider-track:color-mix(in srgb,var(--color-primary) 30%,var(--canvas-surface));
+  --color-primary-darker:color-mix(in srgb,var(--color-primary),black 12%);
+  --color-primary-darkest:color-mix(in srgb,var(--color-primary),black 24%);
+  --color-primary-hover:color-mix(in srgb,var(--color-primary),black 8%);
+  --color-primary-light:color-mix(in srgb,var(--color-primary) 12%,var(--canvas-surface));
+  --color-primary-light-darker:color-mix(in srgb,var(--color-primary) 22%,var(--canvas-surface));
+  --island-bg-color:var(--canvas-surface);
+  --popup-bg-color:var(--canvas-surface);
+  --default-border-color:var(--canvas-border);
+  --dialog-border-color:var(--canvas-border);
+  --text-primary-color:var(--canvas-text);
+  --icon-fill-color:var(--canvas-text);
+  --color-on-surface:var(--canvas-text);
+  --color-on-surface-variant:var(--canvas-muted);
+  --color-surface-low:var(--canvas-surface);
+  --color-surface-mid:var(--canvas-surface);
+  --color-surface-high:color-mix(in srgb,var(--canvas-text) 4%,var(--canvas-surface));
+  --color-surface-lowest:var(--canvas-border);
+  --color-surface-primary-container:var(--color-primary-light);
+  --color-on-primary-container:var(--color-primary);
+  --button-hover-bg:color-mix(in srgb,var(--canvas-accent) 8%,var(--canvas-surface));
+}
+
+/* Excalidraw 0.18 portals dialogs to body, outside .board-panel. Scope these
+   overrides to its dedicated portal instead of styling all app dialogs. */
+.excalidraw.excalidraw-modal-container {
+  font-family: var(--canvas-font);
+  color: var(--canvas-text);
+}
+.excalidraw.excalidraw-modal-container .Modal__background {
+  background: #00000045;
+  backdrop-filter: blur(3px);
+}
+.excalidraw.excalidraw-modal-container .Modal__content {
+  border-color: var(--canvas-border);
+  border-radius: var(--surface-radius);
+  background: var(--canvas-surface);
+  box-shadow: 0 24px 80px #00000020;
+}
+.excalidraw.excalidraw-modal-container .Modal .Island {
+  padding: var(--space-8);
+  color: var(--canvas-text);
+  font-family: var(--canvas-font);
+}
+.excalidraw.excalidraw-modal-container .Dialog__title {
+  padding: 0 36px var(--space-5) 0;
+  margin: 0 0 var(--space-6);
+  border-color: var(--canvas-border);
+  font-size: 1.15rem;
+  font-weight: 550;
+  letter-spacing: -.3px;
+}
+.excalidraw.excalidraw-modal-container :is(.Dialog__close, .board-help-close) {
+  display: inline-flex;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border-radius: var(--control-icon-radius);
+  color: var(--canvas-muted);
+}
+.excalidraw.excalidraw-modal-container :is(.Dialog__close, .board-help-close):hover {
+  background: var(--control-hover);
+  color: var(--canvas-text);
+}
+.excalidraw.excalidraw-modal-container :is(.Dialog__close, .board-help-close) svg { width: 18px; height: 18px; }
+.excalidraw.excalidraw-modal-container .board-help-close:focus-visible { outline: 2px solid var(--canvas-accent); outline-offset: 2px; }
+.excalidraw.excalidraw-modal-container .Dialog__action-button {
+  height: var(--control-height);
+  padding: 0 var(--control-padding);
+  border-radius: var(--control-radius);
+  font-family: var(--canvas-font);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog h3 {
+  margin: var(--space-8) 0 var(--space-5);
+  font-size: .9rem;
+  font-weight: 600;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__header { gap: var(--space-3); }
+.excalidraw.excalidraw-modal-container .HelpDialog__header a:not([href="https://docs.excalidraw.com"]) { display: none; }
+.excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"] { font-size: 0; }
+.excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"]::after { content: 'Excalidraw documentation'; font-size: .78rem; }
+.excalidraw.excalidraw-modal-container .HelpDialog__btn {
+  min-height: var(--control-height);
+  padding: 0 var(--control-padding);
+  border: 1px solid var(--canvas-border);
+  border-radius: var(--control-radius);
+  background: var(--canvas-surface);
+  color: var(--canvas-text);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__btn:hover { background: var(--control-hover); }
+.excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"] { font-size: 0; }
+.excalidraw.excalidraw-modal-container .HelpDialog__island h4 {
+  color: var(--canvas-muted);
+  font-size: .78rem;
+  font-weight: 500;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__island-content {
+  border-color: var(--canvas-border);
+  border-radius: var(--control-radius);
+  overflow: hidden;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__shortcut {
+  min-height: var(--control-height);
+  border-color: var(--canvas-border);
+  color: var(--canvas-text);
+  font-size: .78rem;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__key {
+  padding: 4px 6px;
+  border: 1px solid var(--canvas-border);
+  border-radius: var(--control-radius-small);
+  background: var(--canvas-bg);
+  color: var(--canvas-muted);
+  font-size: .68rem;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative] {
+  display: block;
+  flex-shrink: 1;
+  color: var(--canvas-muted);
+  text-align: right;
+}
+.excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative] > * { display: none; }
+.excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative] { font-size: 0; }
+.excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative]::after {
+  content: attr(data-canvas-alternative);
+  font-size: .68rem;
+}
+/* Excalidraw 0.18 has no public toolbar slot. Hide only its tool rows;
+   keep the local file menu, mobile edit menu, zoom, and history intact. */
+.board-panel .excalidraw .shapes-section,
+.board-panel .excalidraw .App-top-bar .App-toolbar-container { display:none; }
+.board-panel--focus .excalidraw .layer-ui__wrapper__footer-right { display:none; }
+.board-panel.board-panel--focus .excalidraw .layer-ui__wrapper .layer-ui__wrapper__footer-left.zen-mode-transition,
+.board-panel.board-panel--focus .excalidraw .layer-ui__wrapper .undo-redo-buttons.zen-mode-transition { transform:none;transition:none; }
+.board-panel--focus .excalidraw .layer-ui__wrapper .selected-shape-actions.zen-mode-transition.transition-left { transform:none;transition:none; }
+.board-more-tools .board-tool--hand,
+.board-more-tools .board-tool--ellipse,
+.board-more-tools .board-tool--line { display:none; }
+@container (max-width:480px) {
+  .board-drawing-tools > .board-tool--hand,
+  .board-drawing-tools > .board-tool--ellipse,
+  .board-drawing-tools > .board-tool--line { display:none; }
+  .board-more-tools .board-tool--hand,
+  .board-more-tools .board-tool--ellipse,
+  .board-more-tools .board-tool--line { display:inline-flex; }
+}
+@container (max-width:290px) {
+  .board-drawing-tools > .board-tool--rectangle,
+  .board-drawing-tools > .board-tool--arrow { display:none; }
+  .board-more-tools .board-tool--rectangle,
+  .board-more-tools .board-tool--arrow { display:inline-flex; }
+  .board-tool-divider { display:none; }
+}
+@container (min-width:291px) {
+  .board-more-tools .board-tool--rectangle,
+  .board-more-tools .board-tool--arrow { display:none; }
+}
+@media (pointer:coarse) { .board-tool { width:36px;min-width:36px;height:36px;min-height:36px; }.board-tool--expanded { width:100%; } }
+
+/* Leave room for Excalidraw's menu trigger on narrow canvases. */
+@container (max-width: 250px) {
+  .board-drawing-toolbar { top: 58px; }
+  .board-more-tools { max-height: max(0px, calc(var(--board-editor-height) - 138px)); }
+}
+
+/* Excalidraw uses viewport height for menus, but this editor can be smaller. */
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-container {
+  max-height: max(0px, calc(var(--board-editor-height) - 96px));
+}
+
+/* The mobile property panel shares a flex column with the bottom actions. */
+.board-panel .excalidraw .App-mobile-menu {
+  min-height: 0;
+}
+
+/* Match the floating toolbar's surfaces and compact controls. */
+.board-panel .excalidraw .main-menu-trigger,
+.board-panel .excalidraw .help-icon,
+.board-panel .excalidraw .zoom-actions,
+.board-panel .excalidraw .undo-redo-buttons {
+  border: 1px solid var(--canvas-border);
+  border-radius: var(--surface-radius);
+  background: var(--canvas-surface);
+  box-shadow: 0 2px 5px #00000006, 0 5px 18px #00000008;
+}
+.board-panel .excalidraw .main-menu-trigger,
+.board-panel .excalidraw .help-icon {
+  width: calc(var(--control-height) + 10px);
+  height: calc(var(--control-height) + 10px);
+  padding: 0;
+  color: var(--canvas-muted);
+}
+.board-panel .excalidraw .main-menu-trigger svg,
+.board-panel .excalidraw .help-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.board-panel .excalidraw .zoom-actions,
+.board-panel .excalidraw .undo-redo-buttons {
+  padding: 4px;
+}
+.board-panel .excalidraw .undo-redo-buttons,
+.board-panel .excalidraw .zoom-actions > div {
+  gap: 2px;
+}
+.board-panel .excalidraw .zoom-button,
+.board-panel .excalidraw .undo-redo-buttons button {
+  width: var(--control-height);
+  height: var(--control-height);
+  border-radius: var(--control-radius) !important;
+  background: transparent !important;
+  color: var(--canvas-muted);
+}
+.board-panel .excalidraw .reset-zoom-button {
+  width: 54px !important;
+  font-size: 12px !important;
+}
+.board-panel .excalidraw .zoom-button svg,
+.board-panel .excalidraw .undo-redo-buttons button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+.board-panel .excalidraw .zoom-button .ToolIcon__icon,
+.board-panel .excalidraw .undo-redo-buttons button .ToolIcon__icon {
+  border-radius: var(--control-radius) !important;
+}
+.board-panel .excalidraw .main-menu-trigger:hover,
+.board-panel .excalidraw .help-icon:hover,
+.board-panel .excalidraw .zoom-button:hover,
+.board-panel .excalidraw .undo-redo-buttons button:not(:disabled):hover {
+  background: color-mix(in srgb, var(--canvas-accent) 7%, var(--canvas-surface)) !important;
+  color: var(--canvas-text);
+}
+
+/* Keep text-field focus indicators within the control, including grouped fields. */
+.board-panel .excalidraw :is(input[type="text"], input[type="number"], input[type="search"], input:not([type]), textarea:not(.excalidraw-wysiwyg)):not(.color-picker-input):not(.ExcTextField__input input):focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--canvas-accent) !important;
+}
+.board-panel .excalidraw :is(.color-input-container, .color-picker__input-label, .ExcTextField__input):focus-within {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--canvas-accent);
+}
+.board-panel .excalidraw :is(.color-picker-input, .ExcTextField__input input):focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Open engine menus use the same surface and row rhythm as app menus. */
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-container,
+.board-panel .excalidraw .selected-shape-actions .Island,
+.board-panel .excalidraw .App-bottom-bar > .Island,
+.board-panel .excalidraw .properties-content > .Island,
+.board-panel .excalidraw .Island:has(.color-picker-content),
+.board-panel .excalidraw .color-picker {
+  box-sizing: border-box;
+  max-width: calc(100cqw - 16px);
+  border: 1px solid var(--canvas-border);
+  border-radius: var(--surface-radius);
+  background: var(--canvas-surface);
+  box-shadow: 0 4px 10px #00000008, 0 14px 36px #00000012;
+}
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-container {
+  padding: 6px;
+}
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-item {
+  height: var(--control-height);
+  margin: 0;
+  width: 100%;
+  padding: 0 10px;
+  border-radius: var(--control-radius);
+  font-size: 12px;
+}
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-item__text {
+  gap: 10px;
+}
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-item__shortcut {
+  font-size: 11px;
+}
+.board-panel .excalidraw .dropdown-menu .dropdown-menu-container > div[style*="height: 1px"] {
+  margin: 6px !important;
+  background: var(--canvas-border) !important;
+}
+.board-panel .excalidraw .properties-content > .Island,
+.board-panel .excalidraw .Island:has(.color-picker-content) {
+  max-height: max(0px, calc(var(--board-editor-height) - 24px));
+  overflow-y: auto;
+}
+.board-panel .excalidraw .color-picker-swatch,
+.board-panel .excalidraw .color-picker-transparent {
+  border-radius: var(--control-radius-small);
+}
+
+/* The engine renders selected-shape controls in a separate Island on desktop
+   and inside the bottom Island on mobile. Keep both in the app's visual system. */
+.board-panel .excalidraw .HintViewer { display: none; }
+.board-panel .excalidraw .selected-shape-actions .Island { padding: var(--space-6); }
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn {
+  row-gap: var(--space-5);
+  font-family: var(--canvas-font);
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn :is(h3, legend, .control-label) {
+  margin-bottom: var(--space-2);
+  color: var(--canvas-muted);
+  font-family: var(--canvas-font);
+  font-size: 12px;
+  line-height: 1.3;
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList {
+  gap: var(--space-2);
+  padding: 0;
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList :is(label, button, .zIndexButton) {
+  width: var(--control-height);
+  height: var(--control-height);
+  border-radius: var(--control-radius);
+  font-family: var(--canvas-font);
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList .active {
+  color: var(--canvas-accent);
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList label:has(input[name="font-size"]) svg { display: none; }
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList label:has(input[name="font-size"])::after {
+  font: 500 12px/1 var(--canvas-font);
+}
+.board-panel .excalidraw label:has(input[data-testid="fontSize-small"])::after { content: "S"; }
+.board-panel .excalidraw label:has(input[data-testid="fontSize-medium"])::after { content: "M"; }
+.board-panel .excalidraw label:has(input[data-testid="fontSize-large"])::after { content: "L"; }
+.board-panel .excalidraw label:has(input[data-testid="fontSize-veryLarge"])::after { content: "XL"; }
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .color-picker__button { --radius: var(--control-radius-small); }
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .color-picker-label-swatch-container,
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .color-picker-label-swatch {
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  border-radius: var(--control-radius-small);
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .range-wrapper { padding-top: var(--space-4);padding-bottom: 24px; }
