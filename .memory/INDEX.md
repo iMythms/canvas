@@ -11,6 +11,7 @@ current request, then verify consequential facts against the current system.
 
 - `decisions/001-browser-workspace.md` — accepted first-build architecture and reference compatibility.
 - `episodes/2026-11-05.md` — initialization, delegated work, verification and audit results.
+- `state/cloudflare-deployment.md` — verified production Worker, domain, and GitHub build configuration.
 
 - `state/` — current verified facts about architecture, environment, commands,
   dependencies, conventions, and integrations

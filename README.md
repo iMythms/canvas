@@ -2,7 +2,7 @@
 
 A browser-local developer workspace by **Mytham Jasim**. Keep notes, sketch ideas, compare text, and format JSON in one place, with no account or server sync.
 
-Deployment target: [canvas.myth.am](https://canvas.myth.am/) · Source: [iMythms/canvas](https://github.com/iMythms/canvas) (currently private)
+Live app: [canvas.myth.am](https://canvas.myth.am/) · Source: [iMythms/canvas](https://github.com/iMythms/canvas) (currently private)
 
 ## Four tools, one workspace
 

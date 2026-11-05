@@ -2,6 +2,10 @@
 
 Canvas is deployed as Workers Static Assets, without a Worker script. The Wrangler configuration serves `dist` with SPA fallback at `canvas.myth.am` and disables both the production `workers.dev` URL and version preview URLs. The hostname must belong to a zone in the target Cloudflare account, and any conflicting DNS record must be resolved before deployment.
 
+## Current release
+
+The first GitHub-connected production build succeeded on 2026-11-05. Cloudflare account `Mytham` (`46ba6643eac7fcfe9b375551bbd606a7`) hosts Worker `canvas` (`ce75152daa004ecaa7af68bbb7978c09`); the `canvas.myth.am` custom domain is attached and enabled. Workers Builds is connected to `iMythms/canvas` on `main`, with automatic builds enabled, preview builds disabled, and both `workers.dev` and preview URLs disabled. The production HTTPS, asset, and browser checks are still in progress; a successful build and enabled domain do not establish that those checks have passed.
+
 Connect the GitHub repository to Workers Builds and configure:
 
 - Production branch: `main`.
