@@ -52,3 +52,35 @@ quota/failure and multi-tab conflict handling have not been exercised here. The
 pure-module tests do not exercise browser rendering or those flows.
 
 Latest release checks (2026-11-05): `npm test` passed 45/45 and `npm run build` passed. Board Help now uses Canvas theme tokens, a visible Hugeicons close control, and accurate alternatives for workspace-owned shortcuts. Browser checks confirmed that Cmd+D does not split behind Help, Close help dismisses it, and pointer previews dismiss after leaving even after Pin is clicked.
+
+### Production checks (2026-11-05)
+
+Read-only HTTPS checks at `https://canvas.myth.am/` passed: valid TLS, 200 HTML,
+canonical/OG/Twitter URLs, all four security headers from `public/_headers`, and
+a 200 PNG sharing image with actual dimensions 1200 by 630. All 177 JavaScript
+files, four stylesheets and 250 fonts returned 200 with expected MIME types and
+SHA-256 hashes matching `dist`. The sitemap matched the build; `/index.html`
+redirected to `/`. Public DNS resolved, although the local resolver initially
+cached NXDOMAIN, so these checks used the public DNS address with hostname and
+TLS verification preserved.
+
+Production browser checks confirmed note persistence after reload, Board Help
+close, formatter format/minify preserving `9007199254740993`, and Compare split
+and unified views reporting one change. No console errors were observed. The
+temporary note content was cleared after checking persistence.
+
+Cloudflare initially prepended 130 lines of managed content to `robots.txt`;
+the original wildcard `Allow: /` and sitemap remained. The added rules block
+named crawlers including Google-Extended, GoogleOther and GPTBot, but do not
+block Googlebot. Ordinary search crawling remains allowed by these rules;
+actual search indexing was not verified.
+
+Browser-style HTML requests also revealed automatic Cloudflare analytics
+injection, blocked by the existing CSP. Added `no-transform` to Workers' default
+`Cache-Control: public, max-age=0, must-revalidate` policy in `public/_headers`.
+Cloudflare documents this response-level injection opt-out in its
+[Web Analytics FAQ](https://developers.cloudflare.com/web-analytics/faq/);
+the cache defaults and header override are documented under
+[Workers static asset headers](https://developers.cloudflare.com/workers/static-assets/headers/).
+`npm run build`, `cmp public/_headers dist/_headers`, and `git diff --check`
+passed. Production verification of this header change is pending deployment.
