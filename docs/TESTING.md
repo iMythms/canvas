@@ -83,4 +83,4 @@ Cloudflare documents this response-level injection opt-out in its
 the cache defaults and header override are documented under
 [Workers static asset headers](https://developers.cloudflare.com/workers/static-assets/headers/).
 `npm run build`, `cmp public/_headers dist/_headers`, and `git diff --check`
-passed. Production verification of this header change is pending deployment.
+passed. Production verification passed after GitHub-triggered deployment: browser-style Accept and User-Agent requests returned HTTPS 200, the no-transform header, and no injected analytics beacon. The deployed browser reloaded successfully with no console errors.
