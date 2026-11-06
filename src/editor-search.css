@@ -1,0 +1,144 @@
+/* Keep Monaco's inputs, actions and keyboard handling; only arrange and skin
+   its search widget. The bordered panel has an 8px inset around 16px fields. */
+.app-shell .monaco-editor .find-widget[widgetid] {
+  display:grid;
+  grid-template-columns:40px minmax(0,1fr) 40px;
+  gap:var(--space-2);
+  width:440px !important;
+  max-width:calc(100% - 16px) !important;
+  height:auto !important;
+  right:8px !important;
+  margin-top:8px;
+  padding:7px;
+  border:1px solid var(--border-subtle);
+  border-radius:var(--surface-radius);
+  background:var(--canvas-surface);
+  color:var(--canvas-text);
+  box-shadow:var(--shadow-popover);
+  font-family:var(--canvas-font);
+  font-size:var(--ui-text);
+  line-height:20px;
+  transition:transform 140ms ease-out;
+}
+.app-shell .monaco-editor .find-widget[widgetid].hiddenEditor { display:none; }
+.app-shell .monaco-editor .find-widget[widgetid] > .find-part,
+.app-shell .monaco-editor .find-widget[widgetid].replaceToggled > .replace-part { display:contents; }
+.app-shell .monaco-editor .find-widget[widgetid] > .replace-part { display:none; }
+.app-shell .monaco-editor .find-widget[widgetid] .button,
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-custom-toggle {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  width:40px;
+  height:40px;
+  padding:0;
+  margin:0;
+  border:0;
+  border-radius:var(--control-radius);
+  color:var(--canvas-muted) !important;
+  background:transparent !important;
+}
+.app-shell .monaco-editor .find-widget[widgetid] > .button.toggle {
+  position:static;
+  grid-area:1 / 1;
+  align-self:start;
+}
+.app-shell .monaco-editor .find-widget[widgetid] > .button.codicon-widget-close {
+  position:static;
+  grid-area:1 / 3;
+  align-self:start;
+}
+.app-shell .monaco-editor .find-widget[widgetid] .find-actions,
+.app-shell .monaco-editor .find-widget[widgetid] .replace-actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:var(--space-1);
+  height:auto;
+  min-width:0;
+}
+.app-shell .monaco-editor .find-widget[widgetid] .find-actions { grid-area:1 / 2; }
+.app-shell .monaco-editor .find-widget[widgetid] .replace-actions { grid-area:4 / 1 / auto / -1; }
+.app-shell .monaco-editor .find-widget[widgetid] .matchesCount {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  height:auto;
+  margin:0 auto 0 0;
+  padding:0 var(--space-2);
+  color:var(--canvas-muted);
+  font-family:var(--canvas-font);
+  font-size:var(--ui-text-small);
+  font-variant-numeric:tabular-nums;
+  line-height:20px;
+}
+.app-shell .monaco-editor .find-widget[widgetid].no-results .matchesCount { color:#c4655c; }
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:var(--space-1);
+  min-width:0;
+  width:auto !important;
+  padding:3px;
+  border:1px solid var(--border-subtle);
+  border-radius:var(--control-radius);
+  background:var(--canvas-bg);
+}
+.app-shell .monaco-editor .find-widget[widgetid] .find-part > .monaco-findInput { grid-area:2 / 1 / auto / -1; }
+.app-shell .monaco-editor .find-widget[widgetid] .replace-part > .monaco-findInput { grid-area:3 / 1 / auto / -1; }
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput:focus-within { box-shadow:inset 0 0 0 2px var(--canvas-accent); }
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput > .monaco-scrollable-element { flex:1;min-width:0;width:auto; }
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-inputbox {
+  min-height:28px;
+  border:0 !important;
+  border-radius:var(--control-icon-radius);
+  outline:none !important;
+  background:transparent !important;
+  color:var(--canvas-text) !important;
+}
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-inputbox :is(.input,.mirror) {
+  width:100% !important;
+  min-height:28px;
+  padding:4px 8px !important;
+  font-family:var(--canvas-font);
+  font-size:var(--ui-text);
+  line-height:20px;
+  color:var(--canvas-text) !important;
+}
+.app-shell .monaco-editor .find-widget[widgetid] .input::placeholder { color:var(--canvas-muted);opacity:1; }
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput > .controls {
+  position:static;
+  display:flex !important;
+  align-self:flex-start;
+  gap:var(--space-1);
+}
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput .monaco-custom-toggle {
+  width:28px;
+  height:28px;
+  border-radius:var(--control-icon-radius);
+}
+.app-shell .monaco-editor .find-widget[widgetid] :is(.button,.monaco-custom-toggle):not(.disabled):hover { background:var(--control-hover) !important;color:var(--canvas-text) !important; }
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-custom-toggle[aria-checked="true"],
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-custom-toggle[aria-checked="true"]:hover { background:var(--control-selected) !important;color:var(--canvas-accent) !important; }
+.app-shell .monaco-editor .find-widget[widgetid] :is(.button,.monaco-custom-toggle):focus-visible { outline:2px solid var(--canvas-accent);outline-offset:-2px; }
+.app-shell .monaco-editor .find-widget[widgetid] .disabled { opacity:.45; }
+/* Keep the resize handle usable without a square stripe through the corners. */
+.app-shell .monaco-editor .find-widget[widgetid] .monaco-sash { top:24px;height:calc(100% - 48px);background:transparent; }
+/* In a narrow comparison/split editor, put options and navigation on their
+   own rows so the text fields retain usable width. */
+.app-shell .monaco-editor .find-widget[widgetid] { container-type:inline-size; }
+@container(max-width:280px) {
+  .app-shell .monaco-editor .find-widget[widgetid] .find-actions { grid-area:2 / 1 / auto / -1;justify-content:flex-start; }
+  .app-shell .monaco-editor .find-widget[widgetid] .find-part > .monaco-findInput { grid-row:3; }
+  .app-shell .monaco-editor .find-widget[widgetid] .replace-part > .monaco-findInput { grid-row:4; }
+  .app-shell .monaco-editor .find-widget[widgetid] .replace-actions { grid-row:5; }
+  .app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput { flex-wrap:wrap; }
+  .app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput > .monaco-scrollable-element { flex-basis:100%; }
+  .app-shell .monaco-editor .find-widget[widgetid] .monaco-findInput > .controls { margin-left:auto; }
+}
+
+:root[data-input-modality="pointer"] .app-shell .monaco-editor .find-widget[widgetid] :is(.button,.monaco-custom-toggle):focus { outline:none; }

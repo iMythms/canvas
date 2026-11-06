@@ -35,10 +35,15 @@ export type ThemePreset = {
 
 const palette = (background: string, foreground: string, accent: string, surface: string, sidebar: string, muted: string, border: string): Palette => ({ background, foreground, accent, surface, sidebar, muted, border });
 
+// Keep the existing default ID and light palette so saved preferences need no migration.
+const canvasLight = palette('#faf9f6', '#292824', '#b57248', '#ffffff', '#f1f0ec', '#77756e', '#e4e2dc');
+// Source: user-supplied Dracula Pro — Van Helsing palette (2026-11-06).
+const vanHelsingDark = palette('#0b0d0f', '#f8f8f2', '#9580ff', '#131a20', '#0a0d10', '#8aa4bd', '#242a30');
+
 export const themePresets: ThemePreset[] = [
   { id: 'canvas', name: 'Canvas', colors: {
-    light: palette('#faf9f6', '#292824', '#b57248', '#ffffff', '#f1f0ec', '#77756e', '#e4e2dc'),
-    dark: palette('#20201e', '#ecebe7', '#d8a17b', '#282825', '#1b1b19', '#a4a39a', '#3d3c37'),
+    light: canvasLight,
+    dark: vanHelsingDark,
   } },
   { id: 'catppuccin', name: 'Catppuccin', colors: {
     light: palette('#eff1f5', '#4c4f69', '#8839ef', '#ffffff', '#e6e9ef', '#6c6f85', '#ccd0da'),
@@ -89,7 +94,7 @@ export const codeFonts = [
 
 export const defaultAppearance: Appearance = {
   mode: 'system', preset: 'canvas', accent: null, background: null, foreground: null,
-  font: 'system', codeFont: 'mono', uiFontSize: 14, codeFontSize: 13, reduceMotion: false,
+  font: 'system', codeFont: 'mono', uiFontSize: 16, codeFontSize: 15, reduceMotion: false,
 };
 
 /** Keep persisted settings safe to use as CSS, including older or partial saves. */
@@ -103,7 +108,7 @@ export function normalizeAppearance(value: unknown): Appearance {
     accent: color('accent'), background: color('background'), foreground: color('foreground'),
     font: uiFonts.some(item => item.id === settings.font) ? settings.font as string : 'system',
     codeFont: codeFonts.some(item => item.id === settings.codeFont) ? settings.codeFont as string : 'mono',
-    uiFontSize: size('uiFontSize', 14, 12, 20), codeFontSize: size('codeFontSize', 13, 11, 22),
+    uiFontSize: size('uiFontSize', defaultAppearance.uiFontSize, 12, 20), codeFontSize: size('codeFontSize', defaultAppearance.codeFontSize, 11, 22),
     reduceMotion: settings.reduceMotion === true,
   };
 }

@@ -1,20 +1,11 @@
 .board-panel { display:flex;flex-direction:column;position:relative;background:var(--canvas-surface);color:var(--canvas-text);container-type:inline-size; }
-.board-drawing-toolbar { position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;width:max-content;max-width:calc(100% - 16px);padding:4px;border:1px solid var(--canvas-border);border-radius:var(--surface-radius);background:var(--canvas-surface);box-shadow:0 2px 5px #00000006,0 5px 18px #00000008;z-index:5; }
-.board-drawing-tools { display:flex;align-items:center;gap:2px;min-width:0; }
+.board-drawing-toolbar { position:absolute;top:12px;left:76px;right:12px;margin-inline:auto;display:flex;align-items:center;width:max-content;max-width:calc(100% - 88px);padding:4px;border:1px solid var(--canvas-border);border-radius:calc(var(--control-radius) + 5px);background:var(--canvas-surface);box-shadow:0 2px 5px #00000006,0 5px 18px #00000008;z-index:5; }
+.board-drawing-tools { display:flex;align-items:center;gap:2px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none; }
 .board-tool { width:var(--control-height);min-width:var(--control-height);height:var(--control-height);min-height:var(--control-height);padding:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:0;border-radius:var(--control-radius);background:transparent;color:var(--canvas-muted); }
-.board-tool:hover,.board-more[open]>summary { background:color-mix(in srgb,var(--canvas-accent) 7%,transparent);color:var(--canvas-text); }
-.board-tool[aria-pressed="true"],.board-tool[data-active="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); }
-@container (max-width:480px) { .board-more > summary[data-collapsed-active="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); } }
-@container (max-width:290px) { .board-more > summary[data-narrow-active="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); } }
-.board-tool:focus-visible { outline:2px solid var(--canvas-accent);outline-offset:2px; }
+.board-tool:hover { background:color-mix(in srgb,var(--canvas-accent) 7%,transparent);color:var(--canvas-text); }
+.board-tool[aria-pressed="true"] { background:color-mix(in srgb,var(--canvas-accent) 13%,transparent);color:var(--canvas-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--canvas-accent) 25%,transparent); }
+.board-tool:focus-visible { outline:2px solid var(--canvas-accent);outline-offset:-2px; }
 .board-tool-divider { height:20px;width:1px;margin:0 3px;background:var(--canvas-border);flex-shrink:0; }
-.board-more { position:relative; }
-.board-more>summary { list-style:none;cursor:pointer; }
-.board-more>summary::-webkit-details-marker { display:none; }
-.board-more-tools { position:absolute;top:calc(100% + 10px);right:0;width:min(218px,calc(100cqw - 16px));max-height:max(0px,calc(var(--board-editor-height) - 92px));overflow-y:auto;overscroll-behavior:contain;padding:6px;border:1px solid var(--canvas-border);border-radius:var(--surface-radius);background:var(--canvas-surface);box-shadow:0 4px 10px #00000008,0 14px 36px #00000012; }
-.board-tool--expanded { width:100%;min-width:0;justify-content:flex-start;gap:10px;padding:0 10px;font-size:12px;text-align:left; }
-.board-tool--expanded>span { flex:1; }
-.board-more-divider { height:1px;margin:6px;background:var(--canvas-border); }
 .board-engine { flex:1;min-height:0;position:relative; }
 .board-panel .excalidraw,
 .excalidraw.excalidraw-modal-container {
@@ -100,7 +91,7 @@
   padding: 0 var(--control-padding);
   border-radius: var(--control-radius);
   font-family: var(--canvas-font);
-  font-size: .78rem;
+  font-size: var(--ui-text);
   font-weight: 500;
   letter-spacing: normal;
 }
@@ -112,7 +103,7 @@
 .excalidraw.excalidraw-modal-container .HelpDialog__header { gap: var(--space-3); }
 .excalidraw.excalidraw-modal-container .HelpDialog__header a:not([href="https://docs.excalidraw.com"]) { display: none; }
 .excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"] { font-size: 0; }
-.excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"]::after { content: 'Excalidraw documentation'; font-size: .78rem; }
+.excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"]::after { content: 'Excalidraw documentation'; font-size: var(--ui-text); }
 .excalidraw.excalidraw-modal-container .HelpDialog__btn {
   min-height: var(--control-height);
   padding: 0 var(--control-padding);
@@ -120,7 +111,7 @@
   border-radius: var(--control-radius);
   background: var(--canvas-surface);
   color: var(--canvas-text);
-  font-size: .78rem;
+  font-size: var(--ui-text);
   font-weight: 500;
   letter-spacing: normal;
 }
@@ -128,7 +119,7 @@
 .excalidraw.excalidraw-modal-container .HelpDialog__header a[href="https://docs.excalidraw.com"] { font-size: 0; }
 .excalidraw.excalidraw-modal-container .HelpDialog__island h4 {
   color: var(--canvas-muted);
-  font-size: .78rem;
+  font-size: var(--ui-text);
   font-weight: 500;
 }
 .excalidraw.excalidraw-modal-container .HelpDialog__island-content {
@@ -140,7 +131,7 @@
   min-height: var(--control-height);
   border-color: var(--canvas-border);
   color: var(--canvas-text);
-  font-size: .78rem;
+  font-size: var(--ui-text);
 }
 .excalidraw.excalidraw-modal-container .HelpDialog__key {
   padding: 4px 6px;
@@ -148,7 +139,7 @@
   border-radius: var(--control-radius-small);
   background: var(--canvas-bg);
   color: var(--canvas-muted);
-  font-size: .68rem;
+  font-size: var(--ui-text-caption);
 }
 .excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative] {
   display: block;
@@ -160,7 +151,7 @@
 .excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative] { font-size: 0; }
 .excalidraw.excalidraw-modal-container .HelpDialog__key-container[data-canvas-alternative]::after {
   content: attr(data-canvas-alternative);
-  font-size: .68rem;
+  font-size: var(--ui-text-caption);
 }
 /* Excalidraw 0.18 has no public toolbar slot. Hide only its tool rows;
    keep the local file menu, mobile edit menu, zoom, and history intact. */
@@ -170,34 +161,9 @@
 .board-panel.board-panel--focus .excalidraw .layer-ui__wrapper .layer-ui__wrapper__footer-left.zen-mode-transition,
 .board-panel.board-panel--focus .excalidraw .layer-ui__wrapper .undo-redo-buttons.zen-mode-transition { transform:none;transition:none; }
 .board-panel--focus .excalidraw .layer-ui__wrapper .selected-shape-actions.zen-mode-transition.transition-left { transform:none;transition:none; }
-.board-more-tools .board-tool--hand,
-.board-more-tools .board-tool--ellipse,
-.board-more-tools .board-tool--line { display:none; }
-@container (max-width:480px) {
-  .board-drawing-tools > .board-tool--hand,
-  .board-drawing-tools > .board-tool--ellipse,
-  .board-drawing-tools > .board-tool--line { display:none; }
-  .board-more-tools .board-tool--hand,
-  .board-more-tools .board-tool--ellipse,
-  .board-more-tools .board-tool--line { display:inline-flex; }
-}
-@container (max-width:290px) {
-  .board-drawing-tools > .board-tool--rectangle,
-  .board-drawing-tools > .board-tool--arrow { display:none; }
-  .board-more-tools .board-tool--rectangle,
-  .board-more-tools .board-tool--arrow { display:inline-flex; }
-  .board-tool-divider { display:none; }
-}
-@container (min-width:291px) {
-  .board-more-tools .board-tool--rectangle,
-  .board-more-tools .board-tool--arrow { display:none; }
-}
-@media (pointer:coarse) { .board-tool { width:36px;min-width:36px;height:36px;min-height:36px; }.board-tool--expanded { width:100%; } }
-
-/* Leave room for Excalidraw's menu trigger on narrow canvases. */
-@container (max-width: 250px) {
-  .board-drawing-toolbar { top: 58px; }
-  .board-more-tools { max-height: max(0px, calc(var(--board-editor-height) - 138px)); }
+/* Keep every tool directly reachable, including in narrow split panes. */
+@container (max-width:240px) {
+  .board-drawing-toolbar { top:72px;left:12px;max-width:calc(100% - 24px); }
 }
 
 /* Excalidraw uses viewport height for menus, but this editor can be smaller. */
@@ -216,15 +182,16 @@
 .board-panel .excalidraw .zoom-actions,
 .board-panel .excalidraw .undo-redo-buttons {
   border: 1px solid var(--canvas-border);
-  border-radius: var(--surface-radius);
+  border-radius: calc(var(--control-radius) + 5px);
   background: var(--canvas-surface);
   box-shadow: 0 2px 5px #00000006, 0 5px 18px #00000008;
 }
 .board-panel .excalidraw .main-menu-trigger,
 .board-panel .excalidraw .help-icon {
-  width: calc(var(--control-height) + 10px);
-  height: calc(var(--control-height) + 10px);
+  width: calc(var(--control-height) + 8px);
+  height: calc(var(--control-height) + 8px);
   padding: 0;
+  border-radius: var(--control-radius);
   color: var(--canvas-muted);
 }
 .board-panel .excalidraw .main-menu-trigger svg,
@@ -250,7 +217,7 @@
 }
 .board-panel .excalidraw .reset-zoom-button {
   width: 54px !important;
-  font-size: 12px !important;
+  font-size: var(--ui-text) !important;
 }
 .board-panel .excalidraw .zoom-button svg,
 .board-panel .excalidraw .undo-redo-buttons button svg {
@@ -298,21 +265,32 @@
   box-shadow: 0 4px 10px #00000008, 0 14px 36px #00000012;
 }
 .board-panel .excalidraw .dropdown-menu .dropdown-menu-container {
-  padding: 6px;
+  width:max-content;
+  max-width:min(calc(100cqw - 24px),calc(100vw - 24px));
+  padding:calc(var(--space-4) - 1px);
 }
 .board-panel .excalidraw .dropdown-menu .dropdown-menu-item {
-  height: var(--control-height);
-  margin: 0;
-  width: 100%;
-  padding: 0 10px;
-  border-radius: var(--control-radius);
-  font-size: 12px;
+  min-height:var(--control-height);
+  height:auto;
+  margin:0;
+  width:100%;
+  padding:8px 10px;
+  border-radius:var(--control-radius);
+  font-size: var(--ui-text);
 }
 .board-panel .excalidraw .dropdown-menu .dropdown-menu-item__text {
-  gap: 10px;
+  flex:1;
+  min-width:0;
+  width:auto;
+  gap:10px;
+  overflow:visible;
+  white-space:nowrap;
+  text-overflow:clip;
 }
 .board-panel .excalidraw .dropdown-menu .dropdown-menu-item__shortcut {
-  font-size: 11px;
+  flex-shrink:0;
+  white-space:nowrap;
+  font-size:var(--ui-text-caption);
 }
 .board-panel .excalidraw .dropdown-menu .dropdown-menu-container > div[style*="height: 1px"] {
   margin: 6px !important;
@@ -331,7 +309,8 @@
 /* The engine renders selected-shape controls in a separate Island on desktop
    and inside the bottom Island on mobile. Keep both in the app's visual system. */
 .board-panel .excalidraw .HintViewer { display: none; }
-.board-panel .excalidraw .selected-shape-actions .Island { padding: var(--space-6); }
+.board-panel .excalidraw .selected-shape-actions .Island,
+.board-panel .excalidraw .App-bottom-bar > .Island { padding:var(--space-6); }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn {
   row-gap: var(--space-5);
   font-family: var(--canvas-font);
@@ -340,7 +319,7 @@
   margin-bottom: var(--space-2);
   color: var(--canvas-muted);
   font-family: var(--canvas-font);
-  font-size: 12px;
+  font-size: var(--ui-text);
   line-height: 1.3;
 }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList {
@@ -350,15 +329,15 @@
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList :is(label, button, .zIndexButton) {
   width: var(--control-height);
   height: var(--control-height);
-  border-radius: var(--control-radius);
-  font-family: var(--canvas-font);
+  border-radius:calc(var(--surface-radius) - var(--space-6) - 1px);
+  font-family:var(--canvas-font);
 }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList .active {
   color: var(--canvas-accent);
 }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList label:has(input[name="font-size"]) svg { display: none; }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList label:has(input[name="font-size"])::after {
-  font: 500 12px/1 var(--canvas-font);
+  font: 500 var(--ui-text)/1 var(--canvas-font);
 }
 .board-panel .excalidraw label:has(input[data-testid="fontSize-small"])::after { content: "S"; }
 .board-panel .excalidraw label:has(input[data-testid="fontSize-medium"])::after { content: "M"; }
@@ -372,3 +351,38 @@
   border-radius: var(--control-radius-small);
 }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .range-wrapper { padding-top: var(--space-4);padding-bottom: 24px; }
+
+/* Excalidraw renders this section with inline spacing. Give its heading,
+   swatches and the reset action the same 11px action-content inset. */
+.board-panel .excalidraw .dropdown-menu-container > div:has(> [data-testid="canvas-background-label"]) {
+  margin-top:0 !important;
+  padding:var(--space-4) 11px;
+}
+.board-panel .excalidraw [data-testid="canvas-background-label"] {
+  color:var(--canvas-muted);
+  font-size:var(--ui-text-small) !important;
+}
+.board-panel .excalidraw [data-testid="canvas-background-label"] + div { padding:0 !important; }
+.board-panel .excalidraw .dropdown-menu .color-picker__button { --radius:var(--control-radius-small); }
+
+.board-panel .excalidraw .dropdown-menu .color-picker-container { width:max-content;grid-template-columns:auto 20px 26px; }
+.board-panel .excalidraw .dropdown-menu .color-picker__top-picks { justify-content:flex-start;gap:var(--space-4); }
+
+/* Four font actions fit the existing 174px panel content width. */
+.board-panel .excalidraw :is(.selected-shape-actions,.App-mobile-menu) .FontPicker__container {
+  display:flex;
+  align-items:center;
+  gap:var(--space-2);
+  max-width:100%;
+}
+.board-panel .excalidraw .FontPicker__container > .buttonList { flex-wrap:nowrap;flex-shrink:0; }
+.board-panel .excalidraw .FontPicker__container > div:nth-child(2) { display:none; }
+.board-panel .excalidraw .FontPicker__container .buttonList button,
+.board-panel .excalidraw .FontPicker__container .properties-trigger {
+  width:min(var(--control-height),40px);
+  height:min(var(--control-height),40px);
+  border-radius:calc(var(--surface-radius) - var(--space-6) - 1px);
+}
+
+/* Palette grids and hex fields each add 8px inside this bordered popover. */
+.board-panel .excalidraw .Island:has(.color-picker-content) { padding:7px; }

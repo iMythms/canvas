@@ -6,9 +6,11 @@ Run the data-integrity regression suite with:
 npm test
 ```
 
-The tests use Node's built-in test runner and TypeScript stripping. They import
-only the workspace and theme modules, so they do not start Vite, render React,
-or load Monaco or Excalidraw. No test dependencies are required.
+The tests use Node's built-in test runner and TypeScript stripping. They cover
+workspace/theme logic, Markdown, language detection, formatting, syntax token
+colors, and PWA helpers. Token tests load Monaco's actual language grammars;
+the suite does not start Vite or render React/Excalidraw. No test framework
+dependency is required.
 
 Coverage includes Canvas backup round trips for notes, boards, image assets,
 comparisons and appearance; malformed backup rejection before merging; duplicate
@@ -20,11 +22,44 @@ literals, duplicate keys, invalid JSON and available error locations, plus
 idempotence on deeply nested input. In particular, `9007199254740993` is kept
 exactly as written.
 
-The latest recorded run passed all 45 tests. `npm run build` also passed after
+The 2026-11-05 run passed all 45 tests. `npm run build` also passed after
 the preview and icon changes; Vite reported the existing large Monaco chunk
 warning.
 
-### Browser observations so far
+### Refinement checks (2026-11-06)
+
+`npm test` passed 79/79; `npm run typecheck`, `npm run build`, and
+`git diff --check` passed. The existing large Monaco chunk warning remains.
+Coverage now includes actual token colors across all 14 syntax languages,
+seven formatting languages, punctuation-aware cursor mapping, JSON string
+whitespace, stale snapshots, Markdown escaping/frontmatter, and PWA lifecycle
+and shell-cache behavior.
+
+Isolated local previews verified the following:
+
+- Notes Format button and Shift+Alt+F both format code. Keyboard undo/redo restore
+  content and backward selections. An intervening edit prevents a pending
+  formatting result from overwriting it; parser errors leave the note intact.
+- Markdown renders metadata, flowing paragraphs, headings, lists, tables,
+  links and colored fences. Both panes close and reopen while one stays visible.
+  The font selector updates editor/preview text, and its value survives reload.
+- Delegate browser checks covered 1280px, 390px, 320px and a 160px Compare pane;
+  compact board menus, direct tools, built-in font layout, pointer/keyboard
+  focus, search navigation, native double-click editing and synthetic touch
+  double-tap. Canvas zoom moved 100% to 110% while browser scale stayed 1.
+- An isolated production preview verified service worker registration/cache,
+  install dialog focus, simulated dismissal/installation, and offline reload
+  of the previously loaded editor. All 13 shell asset references resolved and
+  `node --check dist/sw.js` passed.
+
+No actual OS installation or physical iOS zoom behavior was verified. Install
+detection is browser-dependent, and uncached tools may require connectivity.
+The custom Markdown renderer covers common constructs, not full CommonMark;
+syntax colors are lexical rather than semantic. External Xiaolai fallback-font
+requests were blocked by CSP during board checks. Production deployment of
+these refinements has not been verified.
+
+### Earlier browser observations (2026-11-05)
 
 Observed in the in-app browser (IAB): a note survives reload; closing and
 reopening it from the sidebar preserves the document and pin; sidebar inline
@@ -35,7 +70,7 @@ changing `aria-current`. ArrowRight enters preview and Escape dismisses it and
 returns focus. The preview fits a 390 px viewport (x=94, width=288, right=382),
 and the board toolbar fits (x=67.5, width=255). `Cmd+D` (split right),
 `Cmd+Shift+D` (split down), and the `Alt+Shift+N/W` fallback shortcuts respond.
-Per-mode sidebar collapse survives reload. In Formatter, format and minify
+Per-mode sidebar collapse survives reload. In JSON, format and minify
 preserve the exact numeric token `9007199254740993`; a valid draft survives
 reload and Download exports `formatted.json` with that token intact. Invalid
 JSON clears the output and disables copy and download, with the observed error
@@ -65,7 +100,7 @@ cached NXDOMAIN, so these checks used the public DNS address with hostname and
 TLS verification preserved.
 
 Production browser checks confirmed note persistence after reload, Board Help
-close, formatter format/minify preserving `9007199254740993`, and Compare split
+close, JSON format/minify preserving `9007199254740993`, and Compare split
 and unified views reporting one change. No console errors were observed. The
 temporary note content was cleared after checking persistence.
 

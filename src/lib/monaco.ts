@@ -1,4 +1,6 @@
 import { loader } from '@monaco-editor/react'
+import { createSyntaxRules, jsonTokenLanguage, withCallableTokens } from './syntaxPalette'
+import { defaultAppearance, resolveAppearance } from './themes'
 import * as monaco from 'monaco-editor/editor/editor.api.js'
 import EditorWorker from 'monaco-editor/editor/editor.worker?worker'
 import 'monaco-editor/features/codicon/register.js'
@@ -10,10 +12,13 @@ import 'monaco-editor/languages/definitions/rust/register.js'
 import 'monaco-editor/editor/contrib/find/browser/findController.js'
 import 'monaco-editor/editor/contrib/folding/browser/folding.js'
 import 'monaco-editor/editor/contrib/bracketMatching/browser/bracketMatching.js'
-import 'monaco-editor/languages/definitions/javascript/register.js'
-import 'monaco-editor/languages/definitions/typescript/register.js'
+// @ts-expect-error Monaco ships these bundled grammar modules without declarations.
+import { conf as javascriptConfiguration, language as javascriptGrammar } from 'monaco-editor/languages/definitions/javascript/javascript.js'
+// @ts-expect-error Monaco ships these bundled grammar modules without declarations.
+import { conf as typescriptConfiguration, language as typescriptGrammar } from 'monaco-editor/languages/definitions/typescript/typescript.js'
 import 'monaco-editor/languages/definitions/markdown/register.js'
-import 'monaco-editor/languages/definitions/python/register.js'
+// @ts-expect-error Monaco ships these bundled grammar modules without declarations.
+import { conf as pythonConfiguration, language as pythonGrammar } from 'monaco-editor/languages/definitions/python/python.js'
 import 'monaco-editor/languages/definitions/css/register.js'
 import 'monaco-editor/languages/definitions/html/register.js'
 import 'monaco-editor/languages/definitions/sql/register.js'
@@ -46,15 +51,11 @@ export interface EditorAppearance {
   codeFontSize: number
 }
 
-export function configureEditorAppearance(theme: 'light' | 'dark', appearance?: EditorAppearance) {
-  if (!appearance) {
-    monaco.editor.setTheme(`canvas-${theme}`)
-    return
-  }
-  monaco.editor.defineTheme(`canvas-custom-${theme}`, {
+function editorThemeData(theme: 'light' | 'dark', appearance: Pick<EditorAppearance, 'accent' | 'background' | 'foreground' | 'muted' | 'border'>): monaco.editor.IStandaloneThemeData {
+  return {
     base: theme === 'dark' ? 'vs-dark' : 'vs',
     inherit: true,
-    rules: [],
+    rules: createSyntaxRules(theme, appearance.background, appearance.foreground),
     colors: {
       'editor.background': appearance.background,
       'editor.foreground': appearance.foreground,
@@ -69,70 +70,44 @@ export function configureEditorAppearance(theme: 'light' | 'dark', appearance?: 
       'editorWidget.border': appearance.border,
       'focusBorder': appearance.accent,
     },
-  })
+  }
+}
+
+export function configureEditorAppearance(theme: 'light' | 'dark', appearance?: EditorAppearance) {
+  if (!appearance) {
+    monaco.editor.setTheme(`canvas-${theme}`)
+    return
+  }
+  monaco.editor.defineTheme(`canvas-custom-${theme}`, editorThemeData(theme, appearance))
   monaco.editor.setTheme(`canvas-custom-${theme}`)
+}
+
+// Register these grammars directly so a lazy bundled provider cannot replace
+// the small callable-token enhancement on the first editor/model activation.
+for (const [id, grammar, configuration] of [
+  ['javascript', javascriptGrammar, javascriptConfiguration],
+  ['typescript', typescriptGrammar, typescriptConfiguration],
+  ['python', pythonGrammar, pythonConfiguration],
+] as const) {
+  const metadata = {
+    javascript: { extensions: ['.js', '.es6', '.jsx', '.mjs', '.cjs'], firstLine: '^#!.*\\bnode', filenames: ['jakefile'], aliases: ['JavaScript', 'javascript', 'js'], mimetypes: ['text/javascript'] },
+    typescript: { extensions: ['.ts', '.tsx', '.cts', '.mts'], aliases: ['TypeScript', 'ts', 'typescript'], mimetypes: ['text/typescript'] },
+    python: { extensions: ['.py', '.rpy', '.pyw', '.cpy', '.gyp', '.gypi'], aliases: ['Python', 'py'], firstLine: '^#!/.*\\bpython[0-9.-]*\\b' },
+  }
+  monaco.languages.register({ id, ...metadata[id] })
+  monaco.languages.setLanguageConfiguration(id, configuration)
+  monaco.languages.setMonarchTokensProvider(id, withCallableTokens(grammar))
 }
 
 // JSON only needs tokenization here; omit language servers and their large workers.
 monaco.languages.register({ id: 'json' })
-monaco.languages.setMonarchTokensProvider('json', {
-  tokenizer: {
-    root: [
-      [/"([^"\\]|\\.)*"(?=\s*:)/, 'key'],
-      [/"([^"\\]|\\.)*"/, 'string'],
-      [/-?\d+(\.\d+)?([eE][+-]?\d+)?/, 'number'],
-      [/\b(true|false|null)\b/, 'keyword'],
-      [/[{}\[\]]/, '@brackets'],
-      [/[,:]/, 'delimiter'],
-    ],
-  },
-})
+monaco.languages.setMonarchTokensProvider('json', jsonTokenLanguage)
 
-monaco.editor.defineTheme('canvas-light', {
-  base: 'vs',
-  inherit: true,
-  rules: [],
-  colors: {
-    'editor.background': '#ffffff',
-    'editor.foreground': '#343b34',
-    'editorLineNumber.foreground': '#b0b6ac',
-    'editorLineNumber.activeForeground': '#63785e',
-    'editor.lineHighlightBackground': '#f7f8f5',
-    'editor.selectionBackground': '#dce8dc',
-    'editor.inactiveSelectionBackground': '#edf1e9',
-    'editorCursor.foreground': '#55705c',
-    'editorIndentGuide.background1': '#edf0e9',
-    'editorWidget.border': '#e5e7e1',
-    'focusBorder': '#92a88d',
-    'diffEditor.insertedTextBackground': '#b8d9b950',
-    'diffEditor.removedTextBackground': '#eabcb050',
-    'diffEditor.insertedLineBackground': '#eef6eb',
-    'diffEditor.removedLineBackground': '#fcf1ed',
-  },
-})
-
-monaco.editor.defineTheme('canvas-dark', {
-  base: 'vs-dark',
-  inherit: true,
-  rules: [],
-  colors: {
-    'editor.background': '#202120',
-    'editor.foreground': '#d7ded4',
-    'editorLineNumber.foreground': '#686f65',
-    'editorLineNumber.activeForeground': '#a7b8a1',
-    'editor.lineHighlightBackground': '#262925',
-    'editor.selectionBackground': '#3d5140',
-    'editor.inactiveSelectionBackground': '#303a30',
-    'editorCursor.foreground': '#b3c9a9',
-    'editorIndentGuide.background1': '#343a32',
-    'editorWidget.border': '#3a4137',
-    'focusBorder': '#92a88d',
-    'diffEditor.insertedTextBackground': '#537c4c60',
-    'diffEditor.removedTextBackground': '#a25f4e50',
-    'diffEditor.insertedLineBackground': '#283326',
-    'diffEditor.removedLineBackground': '#352823',
-  },
-})
+// The wrapper also uses these stable names when no appearance is supplied.
+for (const mode of ['light', 'dark'] as const) {
+  const appearance = resolveAppearance({ ...defaultAppearance, mode }, mode === 'dark')
+  monaco.editor.defineTheme(`canvas-${mode}`, editorThemeData(mode, appearance))
+}
 
 export const editorLanguages = [
   ['plaintext', 'Plain text'],
@@ -155,7 +130,7 @@ export const editorLanguages = [
 export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   automaticLayout: true,
   fontFamily: '"Geist Mono Variable", monospace',
-  fontSize: 13,
+  fontSize: 15,
   lineHeight: 23,
   minimap: { enabled: false },
   lineNumbersMinChars: 4,

@@ -29,3 +29,5 @@ consequences, date, status, and any superseded record.
 Episode filenames use `YYYY-MM-DD.md`. Do not create empty directories or
 placeholder entries; add each memory category only when real information exists.
 - `decisions/002-shared-ui-and-document-navigation.md` — shared UI tokens, sidebar-only documents, theme-backed board and shortcut boundaries.
+- `decisions/003-editor-polish-formatting-and-installation.md` — concentric controls, Canvas dark, Notes formatting/Markdown, built-in board fonts, installation, and JSON naming.
+- `episodes/2026-11-06.md` — refinement implementation, final review fixes, browser checks and remaining platform limits.

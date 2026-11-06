@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#f7f8f5" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws://127.0.0.1:* ws://localhost:*; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <meta name="description" content="A browser-local workspace for notes, code, whiteboards, text comparison, and JSON formatting. No account needed. Your work stays in your browser." />
@@ -24,8 +24,11 @@
     <meta name="twitter:description" content="A browser-local workspace for notes, code, whiteboards, text comparison, and JSON formatting. No account needed. Your work stays in your browser." />
     <meta name="twitter:image" content="https://canvas.myth.am/og-image.png" />
     <meta name="twitter:image:alt" content="Canvas. Notes. Code. Draw. Compare. Your workspace. In your browser." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/canvas-180.png" />
+    <meta name="apple-mobile-web-app-title" content="Canvas" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Canvas — Notes, Code, Whiteboard &amp; Compare</title>
+    <title>Canvas — Notes, Code, Whiteboard, Compare &amp; JSON</title>
   </head>
   <body>
     <div id="root"></div>

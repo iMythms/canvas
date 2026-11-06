@@ -1,7 +1,7 @@
 import { Button } from './ui';
 import { useCallback, useEffect, useId, useRef, useState, type ComponentProps, type CSSProperties, type KeyboardEvent } from "react";
 import { CaptureUpdateAction, DefaultSidebar, Excalidraw, MainMenu, WelcomeScreen } from "@excalidraw/excalidraw";
-import { ArrowUpRight, Circle, Diamond, Eraser, Frame, Hand, ImagePlus, Lock, LockOpen, Maximize, Minus, MoreHorizontal, MousePointer2, Pencil, Square, Type } from "./icons";
+import { ArrowUpRight, Circle, Diamond, Eraser, Frame, Hand, ImagePlus, Lock, LockOpen, Maximize, Minus, MousePointer2, Pencil, Square, Type } from "./icons";
 import "@excalidraw/excalidraw/index.css";
 import "../board.css";
 import { boardBackgroundMode, initialBoardBackground, THEME_BOARD_BACKGROUND, type BoardBackgroundMode } from '../lib/boardTheme';
@@ -31,19 +31,13 @@ const drawingTools: DrawingTool[] = [
   { type: "line", label: "Line", shortcut: "L", icon: Minus },
   { type: "text", label: "Text", shortcut: "T", icon: Type },
   { type: "eraser", label: "Eraser", shortcut: "E", icon: Eraser },
-];
-const moreTools: DrawingTool[] = [
-  { type: "hand", label: "Pan", shortcut: "H", icon: Hand },
-  { type: "ellipse", label: "Ellipse", shortcut: "O", icon: Circle },
   { type: "diamond", label: "Diamond", shortcut: "D", icon: Diamond },
-  { type: "line", label: "Line", shortcut: "L", icon: Minus },
   { type: "image", label: "Image", shortcut: "9", icon: ImagePlus },
   { type: "frame", label: "Frame", shortcut: "F", icon: Frame },
 ];
 
-function ToolButton({ tool, expanded = false, active, disabled, onSelect }: {
+function ToolButton({ tool, active, disabled, onSelect }: {
   tool: DrawingTool;
-  expanded?: boolean;
   active: boolean;
   disabled: boolean;
   onSelect: (type: DrawingTool["type"]) => void;
@@ -51,14 +45,14 @@ function ToolButton({ tool, expanded = false, active, disabled, onSelect }: {
   const Icon = tool.icon;
   return <Button
     type="button"
-    className={`board-tool board-tool--${tool.type}${expanded ? " board-tool--expanded" : ""}`}
-    data-board-control={expanded ? undefined : ""}
+    className={`board-tool board-tool--${tool.type}`}
+    data-board-control=""
     aria-label={tool.label}
     aria-pressed={active}
-    title={`${tool.label} (${tool.shortcut})`}
+    title={`${tool.label} (${tool.shortcut})${tool.type === "selection" ? " · Double-click or double-tap to type" : ""}`}
     disabled={disabled}
     onClick={() => onSelect(tool.type)}
-  ><Icon size={18} strokeWidth={1.7} aria-hidden="true" />{expanded && <><span>{tool.label}</span><kbd>{tool.shortcut}</kbd></>}</Button>;
+  ><Icon size={18} strokeWidth={1.7} aria-hidden="true" /></Button>;
 }
 
 /** The durable, JSON-serializable portion of an Excalidraw scene. */
@@ -92,7 +86,6 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const engineRef = useRef<HTMLDivElement>(null);
-  const moreRef = useRef<HTMLDetailsElement>(null);
   const clearDialogRef = useRef<HTMLDialogElement>(null);
   const clearDialogTitle = useId();
   const clearDialogDescription = useId();
@@ -160,12 +153,10 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
   const selectTool = (type: DrawingTool["type"]) => {
     if (!api) return;
     api.setActiveTool({ type, locked: api.getAppState().activeTool.locked });
-    if (moreRef.current) moreRef.current.open = false;
     focusDrawing();
   };
 
   const handleToolbarKeys = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target instanceof HTMLElement && event.target.closest(".board-more-tools")) return;
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("[data-board-control]"))
       .filter((control) => control.getClientRects().length > 0 && !control.hasAttribute("disabled"));
@@ -182,41 +173,21 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
       className={`board-panel h-full min-h-0 w-full overflow-hidden${focus ? " board-panel--focus" : ""}`}
       style={{ "--board-accent": accent, "--board-editor-height": `${toolState.editorHeight}px` } as CSSProperties}
       aria-label="Whiteboard"
-      onPointerDownCapture={(event) => {
-        if (moreRef.current && !moreRef.current.contains(event.target as Node)) moreRef.current.open = false;
-      }}
     >
       <div className="board-drawing-toolbar">
         <div className="board-drawing-tools" role="toolbar" aria-label="Drawing tools" onKeyDown={handleToolbarKeys}>
           {drawingTools.map((tool) => <ToolButton key={tool.type} tool={tool} active={toolState.type === tool.type} disabled={!api} onSelect={selectTool} />)}
           <span className="board-tool-divider" aria-hidden="true" />
-          <details ref={moreRef} className="board-more" onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) event.currentTarget.open = false;
-          }} onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.preventDefault();
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector("summary")?.focus();
-            }
-          }}>
-            <summary className="board-tool" title="More drawing tools" aria-label="More drawing tools" data-board-control="" data-active={["diamond", "image", "frame"].includes(toolState.type)} data-collapsed-active={["hand", "ellipse", "line"].includes(toolState.type)} data-narrow-active={["rectangle", "arrow"].includes(toolState.type)}><MoreHorizontal size={18} strokeWidth={1.7} aria-hidden="true" /></summary>
-            <div className="board-more-tools" role="group" aria-label="More drawing tools">
-              {[...moreTools, ...drawingTools.filter((tool) => tool.type === "rectangle" || tool.type === "arrow")].map((tool) => <ToolButton key={tool.type} tool={tool} expanded active={toolState.type === tool.type} disabled={!api} onSelect={selectTool} />)}
-              <div className="board-more-divider" />
-              <Button type="button" className="board-tool board-tool--expanded" aria-pressed={toolState.locked} disabled={!api} onClick={() => {
-                if (!api) return;
-                const active = api.getAppState().activeTool;
-                if (active.type !== "custom") api.setActiveTool({ type: active.type, locked: !active.locked });
-                if (moreRef.current) moreRef.current.open = false;
-                focusDrawing();
-              }}>{toolState.locked ? <Lock size={18} strokeWidth={1.7} aria-hidden="true" /> : <LockOpen size={18} strokeWidth={1.7} aria-hidden="true" />}<span>Keep tool active</span><kbd>Q</kbd></Button>
-              <Button type="button" className="board-tool board-tool--expanded" disabled={!api} onClick={() => {
-                api?.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.85, animate: false });
-                if (moreRef.current) moreRef.current.open = false;
-                focusDrawing();
-              }}><Maximize size={18} strokeWidth={1.7} aria-hidden="true" /><span>Fit drawing</span></Button>
-            </div>
-          </details>
+          <Button type="button" className="board-tool" data-board-control="" aria-label="Keep tool active" title="Keep tool active (Q)" aria-pressed={toolState.locked} disabled={!api} onClick={() => {
+            if (!api) return;
+            const active = api.getAppState().activeTool;
+            if (active.type !== "custom") api.setActiveTool({ type: active.type, locked: !active.locked });
+            focusDrawing();
+          }}>{toolState.locked ? <Lock size={18} strokeWidth={1.7} aria-hidden="true" /> : <LockOpen size={18} strokeWidth={1.7} aria-hidden="true" />}</Button>
+          <Button type="button" className="board-tool" data-board-control="" aria-label="Fit drawing" title="Fit drawing" disabled={!api} onClick={() => {
+            api?.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.85, animate: false });
+            focusDrawing();
+          }}><Maximize size={18} strokeWidth={1.7} aria-hidden="true" /></Button>
         </div>
       </div>
       <div ref={engineRef} className="board-engine" style={{ background: 'var(--canvas-bg)' }}>

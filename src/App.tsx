@@ -1,3 +1,4 @@
+import { detectLanguage } from './lib/noteMode';
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { ArrowDownToLine, ArrowUpFromLine, Check, Columns2, Rows2, CircleHelp, Code2, Copy, FileText, FolderOpen, GitCompareArrows, Maximize2, Menu, MoreHorizontal, Palette, PanelLeftClose, Pin, Plus, Search, Shapes, Trash2, X } from './components/icons';
 import BrandMark from './components/BrandMark';
@@ -6,6 +7,8 @@ import AppearancePanel from './components/AppearancePanel';
 import DocumentView from './components/DocumentView';
 import SplitPanes, { type SplitDirection } from './components/SplitPanes';
 import SidebarRail from './components/SidebarRail';
+import InstallApp from './pwa/InstallApp';
+import { usePwaInstall } from './pwa/usePwaInstall';
 import SidebarDocuments from './components/SidebarDocuments';
 import { resolveAppearance } from './lib/themes';
 import { useWorkspace } from './lib/useWorkspace';
@@ -17,11 +20,12 @@ const modeDetails = {
   notes: { label: 'Notes', singular: 'note', icon: FileText },
   board: { label: 'Board', singular: 'board', icon: Shapes },
   compare: { label: 'Compare', singular: 'comparison', icon: GitCompareArrows },
-  formatter: { label: 'Formatter', singular: 'formatter', icon: Code2 },
+  formatter: { label: 'JSON', singular: 'JSON document', icon: Code2 },
 };
 
 
 export default function App() {
+  const install = usePwaInstall();
   const { workspace, update, error } = useWorkspace();
   const workspaceRef = useRef(workspace);
   workspaceRef.current = workspace;
@@ -32,7 +36,6 @@ export default function App() {
   const [focus, setFocus] = useState(false);
   const [split, setSplit] = useState<{ direction: SplitDirection; secondaryId: string } | null>(null);
   const [activePane, setActivePane] = useState<'primary' | 'secondary'>('primary');
-  const [preview, setPreview] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notice, setNotice] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Item | null>(null);
@@ -105,7 +108,7 @@ export default function App() {
     })) return;
     if (inSecondary) setSplit({ ...split, secondaryId: item.id });
     else if (item.kind !== mode) { setSplit(null); setActivePane('primary'); }
-    setPreview(false); setAppearanceOpen(false); setQuery(''); setSidebarOpen(false); setMenuOpen(false);
+    setAppearanceOpen(false); setQuery(''); setSidebarOpen(false); setMenuOpen(false);
   }, [update, split, activePane, mode]);
   const newItem = useCallback((kind: Mode) => addDocument(createItem(kind)), [addDocument]);
   const focusPane = useCallback((pane: 'primary' | 'secondary') => {
@@ -135,7 +138,7 @@ export default function App() {
     if (!primary) { newItem(mode); return; }
     const item = createItem(mode);
     if (!update(current => ({ ...current, items: [...current.items, item], openTabs: [...(current.openTabs ?? current.items.map(document => document.id)), item.id] }))) return;
-    setSplit({ direction, secondaryId: item.id }); setActivePane('secondary'); setPreview(false); setAppearanceOpen(false);
+    setSplit({ direction, secondaryId: item.id }); setActivePane('secondary'); setAppearanceOpen(false);
   }, [split, primary?.id, mode, newItem, update]);
   const splitDocument = useCallback((item: Item) => {
     if (split && (item.id === primary?.id || item.id === secondary?.id)) {
@@ -155,7 +158,7 @@ export default function App() {
     })) return;
     setSplit({ direction: 'vertical', secondaryId: intoPrimary ? split.secondaryId : item.id });
     setActivePane(intoPrimary ? 'primary' : 'secondary');
-    setPreview(false); setAppearanceOpen(false); setSidebarOpen(false); setMenuOpen(false);
+    setAppearanceOpen(false); setSidebarOpen(false); setMenuOpen(false);
   }, [primary?.id, secondary?.id, split, activePane, splitWorkspace, focusPane, update]);
   const patchItem = useCallback((id: string, patch: Partial<Item>) => {
     update(current => ({ ...current, items: current.items.map(item => item.id === id ? { ...item, ...patch, updatedAt: Date.now() } as Item : item) }));
@@ -205,7 +208,7 @@ export default function App() {
       const imported = parseImport(await file.text());
       if (!update(current => mergeImport(current, imported))) return;
       setNotice(`Imported ${imported.items.length} items from your backup. Your existing work is still here.`);
-      setPreview(false); setAppearanceOpen(false); setSplit(null); setActivePane('primary'); setRenameId(null); setMenuOpen(false);
+      setAppearanceOpen(false); setSplit(null); setActivePane('primary'); setRenameId(null); setMenuOpen(false);
     } catch (cause) { setNotice(cause instanceof Error ? cause.message : 'Could not import this backup.'); }
   }
 
@@ -216,7 +219,7 @@ export default function App() {
       const notes = await Promise.all(files.map(async file => ({ ...createItem('notes') as Note, name: file.name.slice(0, 300), content: await file.text(), language: languageFromFilename(file.name) })));
       if (notes.length === 0) return;
       if (!update(current => ({ ...openDocument({ ...current, items: [...current.items, ...notes] }, notes[0]!), openTabs: [...(current.openTabs ?? current.items.map(item => item.id)), ...notes.map(item => item.id)] }))) return;
-      setPreview(false); setAppearanceOpen(false); setQuery(''); setSplit(null); setActivePane('primary'); setRenameId(null); setMenuOpen(false);
+      setAppearanceOpen(false); setQuery(''); setSplit(null); setActivePane('primary'); setRenameId(null); setMenuOpen(false);
       setNotice(`Opened ${notes.length} ${notes.length === 1 ? 'file' : 'files'} in your workspace.`);
     } catch (cause) { setNotice(cause instanceof Error ? cause.message : 'Could not open these files.'); }
   }
@@ -224,7 +227,8 @@ export default function App() {
   function downloadActive() {
     if (!active) return;
     if (active.kind === 'notes') {
-      const extension = ({ markdown: 'md', typescript: 'ts', javascript: 'js', plaintext: 'txt', python: 'py' } as Record<string, string>)[active.language] ?? active.language;
+      const language = active.language === 'auto' ? detectLanguage(active.content) : active.language;
+      const extension = ({ markdown: 'md', typescript: 'ts', javascript: 'js', plaintext: 'txt', python: 'py' } as Record<string, string>)[language] ?? language;
       downloadFile(/\.[a-z0-9]+$/i.test(active.name) ? active.name : `${active.name}.${extension}`, active.content);
     } else if (active.kind === 'compare') {
       downloadFile(`${active.name}.json`, JSON.stringify({ original: active.original, modified: active.modified, language: active.language }, null, 2), 'application/json');
@@ -261,24 +265,23 @@ export default function App() {
         renderRename={renderRename} onRename={beginRename} onClose={closeTab}
         onOpen={item => { activateDocument(item); setAppearanceOpen(false); setSidebarOpen(false); setMenuOpen(false); }}
         onPin={item => patchItem(item.id, { pinned: !item.pinned })} onSplit={splitDocument}/>
-      <Button className="new-item-button" onClick={() => newItem(mode)}><Plus size={15}/><span>New {modeDetails[mode].singular}</span><kbd>⌘ N</kbd></Button>
-      <div className="sidebar-bottom"><Button className={`sidebar-action ${appearanceOpen ? 'selected' : ''}`} onClick={() => { setAppearanceOpen(true); setSidebarOpen(false); }}><Palette size={16}/>Appearance<span className="theme-dots"><i style={{ background: palette.accent }}/></span></Button><div className="sidebar-utilities"><Button className="icon-button" title="Open file" aria-label="Open file" onClick={() => fileInput.current?.click()}><FolderOpen size={16}/></Button><Button className="icon-button" title="Export workspace" aria-label="Export workspace" onClick={backup}><ArrowDownToLine size={16}/></Button><Button className="icon-button" title="Import backup" aria-label="Import backup" onClick={() => backupInput.current?.click()}><ArrowUpFromLine size={16}/></Button><Button className="icon-button" title="Help and shortcuts" aria-label="Help and shortcuts" onClick={() => setHelpOpen(true)}><CircleHelp size={16}/></Button></div></div>
+      <div className="sidebar-bottom"><InstallApp install={install}/><Button className={`sidebar-action ${appearanceOpen ? 'selected' : ''}`} onClick={() => { setAppearanceOpen(true); setSidebarOpen(false); }}><Palette size={16}/>Appearance<span className="theme-dots"><i style={{ background: palette.accent }}/></span></Button><div className="sidebar-utilities"><Button className="icon-button" title="Open file" aria-label="Open file" onClick={() => fileInput.current?.click()}><FolderOpen size={16}/></Button><Button className="icon-button" title="Export workspace" aria-label="Export workspace" onClick={backup}><ArrowDownToLine size={16}/></Button><Button className="icon-button" title="Import backup" aria-label="Import backup" onClick={() => backupInput.current?.click()}><ArrowUpFromLine size={16}/></Button><Button className="icon-button" title="Help and shortcuts" aria-label="Help and shortcuts" onClick={() => setHelpOpen(true)}><CircleHelp size={16}/></Button></div></div>
     </aside>
-    {sidebarCollapsed && !focus && <SidebarRail items={modes.map(id => ({ id, ...modeDetails[id] }))} active={mode} appearanceOpen={appearanceOpen}
+    {sidebarCollapsed && !focus && <SidebarRail installAction={<InstallApp install={install} compact/>} items={modes.map(id => ({ id, ...modeDetails[id] }))} active={mode} appearanceOpen={appearanceOpen}
       onExpand={() => setSidebarCollapsed(false)} onSelect={selectMode} onNew={() => newItem(mode)}
       onSearch={() => { setSidebarCollapsed(false); requestAnimationFrame(() => searchInput.current?.focus()); }}
       onAppearance={() => setAppearanceOpen(true)} onHelp={() => setHelpOpen(true)}/>}
     <main className="main-area" id="workspace-content">
-      <header className="topbar"><div className="breadcrumb"><Button className="icon-button mobile-only" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)}><Menu size={18}/></Button><Button className="icon-button desktop-only" aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'} title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'} onClick={() => setSidebarCollapsed(!sidebarCollapsed)}><PanelLeftClose size={17}/></Button></div><div className="mode-switcher" role="tablist" aria-label="Workspace mode">{(Object.keys(modeDetails) as Mode[]).map(key => { const Icon = modeDetails[key].icon; return <Button key={key} id={`mode-tab-${key}`} role="tab" aria-selected={mode === key} aria-controls="workspace-mode-panel" tabIndex={mode === key ? 0 : -1} onKeyDown={event => navigateTabs(event, modes, key, 'mode-tab-')} className={mode === key && !appearanceOpen ? 'selected' : ''} onClick={() => selectMode(key)}><Icon size={15}/><span>{modeDetails[key].label}</span></Button>; })}</div><div className="topbar-actions">{active && !appearanceOpen && <div className="document-actions"><Button className={`icon-button ${active.pinned ? 'is-pinned' : ''}`} aria-label={active.pinned ? 'Unpin document' : 'Pin document'} title={active.pinned ? 'Unpin document' : 'Pin document'} onClick={() => patchItem(active.id, { pinned: !active.pinned })}><Pin size={15}/></Button><div className="document-menu"><Button id="document-actions-trigger" className="icon-button" aria-label="Document actions" title="Document actions" aria-expanded={menuOpen} aria-controls={menuOpen ? 'document-actions-menu' : undefined} onClick={() => setMenuOpen(!menuOpen)}><MoreHorizontal size={19}/></Button>{menuOpen && <><Button className="menu-backdrop" aria-label="Close document actions" onClick={() => setMenuOpen(false)}/><div className="document-dropdown" id="document-actions-menu" aria-label="Document actions"><Button onClick={() => { beginRename(active); setMenuOpen(false); }}><FileText size={15}/>Rename</Button><Button onClick={downloadActive}><ArrowDownToLine size={15}/>Download {modeDetails[mode].singular}</Button><Button onClick={() => { const clone = { ...active, id: crypto.randomUUID(), name: `${active.name} copy`.slice(0, 300), updatedAt: Date.now() }; addDocument(clone); }}><Copy size={15}/>Duplicate</Button>{active.kind === 'notes' && <Button onClick={() => { const item = { ...createItem('compare'), original: active.content, modified: active.content, language: active.language, name: `Compare ${active.name}`.slice(0, 300) } as Item; addDocument(item); }}><GitCompareArrows size={15}/>Compare this note</Button>}<Button className="danger" onClick={() => { setConfirmDelete(active); setMenuOpen(false); }}><Trash2 size={15}/>Delete {modeDetails[mode].singular}</Button></div></>}</div></div>}<div className="pane-toolbar"><Button className="icon-button" title="Split right (⌘/Ctrl D)" aria-label="Split right" onClick={() => splitWorkspace('vertical')}><Columns2 size={16}/></Button><Button className="icon-button" title="Split down (⌘/Ctrl Shift D)" aria-label="Split down" onClick={() => splitWorkspace('horizontal')}><Rows2 size={16}/></Button></div><Button className="icon-button" aria-label={focus ? 'Exit focus mode' : 'Focus mode'} title={focus ? 'Exit focus mode' : 'Focus mode'} aria-pressed={focus} onClick={() => setFocus(!focus)}><Maximize2 size={16}/></Button></div></header>
+      <header className="topbar"><div className="breadcrumb"><Button className="icon-button mobile-only" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)}><Menu size={18}/></Button><Button className="icon-button desktop-only" aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'} title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'} onClick={() => setSidebarCollapsed(!sidebarCollapsed)}><PanelLeftClose size={17}/></Button></div><div className="mode-switcher" role="tablist" aria-label="Workspace mode">{(Object.keys(modeDetails) as Mode[]).map(key => { const Icon = modeDetails[key].icon; return <Button key={key} id={`mode-tab-${key}`} role="tab" aria-selected={mode === key} aria-controls="workspace-mode-panel" tabIndex={mode === key ? 0 : -1} onKeyDown={event => navigateTabs(event, modes, key, 'mode-tab-')} className={mode === key && !appearanceOpen ? 'selected' : ''} onClick={() => selectMode(key)}><Icon size={15}/><span>{modeDetails[key].label}</span></Button>; })}</div><div className="topbar-actions">{active && !appearanceOpen && <div className="document-actions"><Button className={`icon-button ${active.pinned ? 'is-pinned' : ''}`} aria-label={active.pinned ? 'Unpin document' : 'Pin document'} title={active.pinned ? 'Unpin document' : 'Pin document'} onClick={() => patchItem(active.id, { pinned: !active.pinned })}><Pin size={15}/></Button><div className="document-menu"><Button id="document-actions-trigger" className="icon-button" aria-label="Document actions" title="Document actions" aria-expanded={menuOpen} aria-controls={menuOpen ? 'document-actions-menu' : undefined} onClick={() => setMenuOpen(!menuOpen)}><MoreHorizontal size={19}/></Button>{menuOpen && <><Button className="menu-backdrop" aria-label="Close document actions" onClick={() => setMenuOpen(false)}/><div className="document-dropdown" id="document-actions-menu" aria-label="Document actions"><Button onClick={() => { beginRename(active); setMenuOpen(false); }}><FileText size={15}/>Rename</Button><Button onClick={downloadActive}><ArrowDownToLine size={15}/>Download {modeDetails[mode].singular}</Button><Button onClick={() => { const clone = { ...active, id: crypto.randomUUID(), name: `${active.name} copy`.slice(0, 300), updatedAt: Date.now() }; addDocument(clone); }}><Copy size={15}/>Duplicate</Button>{active.kind === 'notes' && <Button onClick={() => { const item = { ...createItem('compare'), original: active.content, modified: active.content, language: active.language === 'auto' ? detectLanguage(active.content) : active.language, name: `Compare ${active.name}`.slice(0, 300) } as Item; addDocument(item); }}><GitCompareArrows size={15}/>Compare this note</Button>}<Button className="danger" onClick={() => { setConfirmDelete(active); setMenuOpen(false); }}><Trash2 size={15}/>Delete {modeDetails[mode].singular}</Button></div></>}</div></div>}<div className="pane-toolbar"><Button className="icon-button" title="Split right (⌘/Ctrl D)" aria-label="Split right" onClick={() => splitWorkspace('vertical')}><Columns2 size={16}/></Button><Button className="icon-button" title="Split down (⌘/Ctrl Shift D)" aria-label="Split down" onClick={() => splitWorkspace('horizontal')}><Rows2 size={16}/></Button></div><Button className="icon-button" aria-label={focus ? 'Exit focus mode' : 'Focus mode'} title={focus ? 'Exit focus mode' : 'Focus mode'} aria-pressed={focus} onClick={() => setFocus(!focus)}><Maximize2 size={16}/></Button></div></header>
       {error && <div className="error-banner" role="alert"><span>{error}</span><Button onClick={backup}>Export backup</Button><Button onClick={() => location.reload()}>Reload</Button></div>}
       <WorkspaceSurface id="workspace-mode-panel" role="tabpanel" aria-labelledby={`mode-tab-${mode}`}>{appearanceOpen ? <AppearancePanel value={workspace.appearance} onChange={value => update(current => ({ ...current, appearance: value }))} onClose={() => setAppearanceOpen(false)}/> : <>
       <section className={`workspace-panel ${mode === 'board' ? 'board-workspace' : ''}`} aria-label={`${modeDetails[mode].label} workspace`}>
 
         {primary ? <div ref={paneRoot} className="panel-content" id="workspace-document-panel" role="region" aria-label={active?.name || 'Document'}>{split && secondary ? <SplitPanes direction={split.direction} activePane={activePane} onActivate={setActivePane}
-          first={<><div className="pane-header"><span>{primary.name}</span></div><div className="pane-body"><DocumentView item={primary} appearance={editorAppearance} focus={focus} preview={preview} onPreviewChange={setPreview} onChange={patchItem}/></div></>}
-          second={<><div className="pane-header"><span>{secondary.name}</span><Button className="icon-button" title="Close split pane" aria-label="Close split pane" onClick={() => { setSplit(null); setActivePane('primary'); }}><X size={13}/></Button></div><div className="pane-body"><DocumentView item={secondary} appearance={editorAppearance} focus={focus} preview={preview} onPreviewChange={setPreview} onChange={patchItem}/></div></>}/>
-          : <DocumentView item={primary} appearance={editorAppearance} focus={focus} preview={preview} onPreviewChange={setPreview} onChange={patchItem}/>}</div>
-         : <div className="empty-state"><span className="empty-icon"><ModeIcon size={30}/></span><h2>No open {modeDetails[mode].label.toLowerCase()}</h2><Button className="primary-button" onClick={() => newItem(mode)}><Plus size={16}/>New {modeDetails[mode].singular}</Button></div>}
+          first={<><div className="pane-header"><span>{primary.name}</span></div><div className="pane-body"><DocumentView key={primary.id} item={primary} appearance={editorAppearance} focus={focus} onFontSizeChange={size => update(current => ({ ...current, appearance: { ...current.appearance, codeFontSize: size } }))} onChange={patchItem}/></div></>}
+          second={<><div className="pane-header"><span>{secondary.name}</span><Button className="icon-button" title="Close split pane" aria-label="Close split pane" onClick={() => { setSplit(null); setActivePane('primary'); }}><X size={13}/></Button></div><div className="pane-body"><DocumentView key={secondary.id} item={secondary} appearance={editorAppearance} focus={focus} onFontSizeChange={size => update(current => ({ ...current, appearance: { ...current.appearance, codeFontSize: size } }))} onChange={patchItem}/></div></>}/>
+          : <DocumentView key={primary.id} item={primary} appearance={editorAppearance} focus={focus} onFontSizeChange={size => update(current => ({ ...current, appearance: { ...current.appearance, codeFontSize: size } }))} onChange={patchItem}/>}</div>
+         : <div className="empty-state"><span className="empty-icon"><ModeIcon size={30}/></span><h2>No open {mode === 'formatter' ? 'JSON documents' : modeDetails[mode].label.toLowerCase()}</h2><Button className="primary-button" onClick={() => newItem(mode)}><Plus size={16}/>New {modeDetails[mode].singular}</Button></div>}
       </section></>}</WorkspaceSurface>
     </main>
 

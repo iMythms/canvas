@@ -281,5 +281,5 @@ test('formatter drafts round trip even when JSON is incomplete', () => {
   const next = openDocument({ ...current, items: [...current.items, draft] }, draft);
   assert.deepEqual(parseWorkspace(JSON.parse(exportWorkspace(next)).workspace), next);
   assert.equal(parseImport(exportWorkspace(next)).items.at(-1)?.kind, 'formatter');
-  assert.throws(() => parseWorkspace({ ...next, items: [{ ...draft, content: 42 }] }), /formatter text/);
+  assert.throws(() => parseWorkspace({ ...next, items: [{ ...draft, content: 42 }] }), /JSON document text/);
 });

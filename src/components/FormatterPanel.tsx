@@ -70,7 +70,7 @@ export default function FormatterPanel({ id, value, theme, appearance, onChange 
 
   return (
     <div className="formatter-panel">
-      <div className="editor-toolbar formatter-toolbar" role="toolbar" aria-label="JSON formatter tools">
+      <div className="editor-toolbar formatter-toolbar" role="toolbar" aria-label="JSON tools">
         <div className="formatter-actions">
           <div className="ui-segmented" role="group" aria-label="Output format">
             <Button size="sm" aria-pressed={mode === 'format'} onClick={() => setMode('format')}><Code2 size={14} />Format</Button>

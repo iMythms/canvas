@@ -80,3 +80,24 @@ test('custom colors override a preset and produce valid related surfaces without
   assert.notEqual(resolved.surface, resolveAppearance({ ...settings, background: null }, false).surface);
   assert.deepEqual(settings, before);
 });
+
+test('new defaults use Canvas dark with the existing Canvas light palette', () => {
+  assert.equal(defaultAppearance.uiFontSize, 16);
+  assert.equal(defaultAppearance.codeFontSize, 15);
+  const dark = resolveAppearance(defaultAppearance, true);
+  assert.deepEqual(
+    [dark.background, dark.foreground, dark.accent, dark.surface, dark.sidebar, dark.muted, dark.border],
+    ['#0b0d0f', '#f8f8f2', '#9580ff', '#131a20', '#0a0d10', '#8aa4bd', '#242a30'],
+  );
+  assert.equal(resolveAppearance(defaultAppearance, false).background, '#faf9f6');
+  assert.equal(themePresets.some(preset => preset.id === 'dracula-pro-van-helsing'), false);
+});
+
+test('explicit saved presets, font sizes and colors survive the new defaults', () => {
+  const saved = { ...defaultAppearance, mode: 'dark' as const, preset: 'dracula', uiFontSize: 14, codeFontSize: 13, accent: '#123456' };
+  assert.deepEqual(normalizeAppearance(saved), saved);
+  const resolved = resolveAppearance(saved, true);
+  assert.equal(resolved.background, '#282a36');
+  assert.equal(resolved.foreground, '#f8f8f2');
+  assert.equal(resolved.accent, '#123456');
+});

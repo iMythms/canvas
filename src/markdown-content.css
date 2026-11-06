@@ -1,0 +1,12 @@
+.markdown-page p, .markdown-page blockquote, .markdown-page li { white-space: normal; }
+.markdown-page h1, .markdown-page h2 { padding-bottom: .3em; border-bottom: 1px solid var(--border-subtle); }
+.markdown-page h4 { font-size: 1em; }
+.markdown-page h5 { font-size: .875em; }
+.markdown-page h6 { font-size: .85em; color: var(--canvas-muted); }
+.markdown-page > :first-child { margin-top: 0; }
+.markdown-page li + li { margin-top: .25em; }
+.markdown-page :not(pre) > code { padding: .15em .35em; }
+.markdown-page pre { line-height: 1.5; margin: 0 0 1em; }
+.markdown-page hr { border: 0; border-top: 1px solid var(--border-subtle); margin: 1.5em 0; }
+.markdown-metadata table { width: 100%; font-size: .9em; }
+.markdown-metadata th { width: 1%; white-space: nowrap; color: var(--canvas-muted); }

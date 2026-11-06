@@ -6,6 +6,19 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, RotateCcw } from './icons';
 import '../ui.css';
 
+// File pickers and editor widgets can restore focus after a pointer action.
+// Retain the last input modality so that restoration does not draw a keyboard ring.
+const focusModalityEvents = new AbortController();
+document.addEventListener('pointerdown', () => {
+  if (document.documentElement.dataset.inputModality !== 'pointer') document.documentElement.dataset.inputModality = 'pointer';
+}, { capture:true, signal:focusModalityEvents.signal });
+document.addEventListener('keydown', event => {
+  if (event.isTrusted && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
+    if (document.documentElement.dataset.inputModality !== 'keyboard') document.documentElement.dataset.inputModality = 'keyboard';
+  }
+}, { capture:true, signal:focusModalityEvents.signal });
+import.meta.hot?.dispose(() => focusModalityEvents.abort());
+
 function classes(...values: (string | undefined | false)[]) {
   return values.filter(Boolean).join(' ');
 }

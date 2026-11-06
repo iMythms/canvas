@@ -1,5 +1,7 @@
 # Dependency notes
 
+On 2026-11-06 the user approved adding Prettier 3.9.10 for local Notes formatting. Standalone and language plugins load lazily in a worker; no formatting service is used. JSON continues to use the existing lossless formatter. PWA support adds no dependencies. Board fonts remain built-in: an Excalidraw fork/custom font IDs were considered and explicitly declined.
+
 Checked against npm on 2026-11-05. Direct dependencies were the latest stable
 versions at that time. Excalidraw 0.18.1 declares React 19 support. Its pinned
 Radix tabs 1.0.2 is overridden to 1.2.1, which declares React 19 support and

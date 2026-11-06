@@ -28,7 +28,7 @@ export const languages = [
 
 export function createItem(kind: Mode): Item {
   const base = { id: crypto.randomUUID(), name: ({ notes: 'Untitled note', board: 'Untitled board', compare: 'Untitled comparison', formatter: 'Untitled JSON' })[kind], updatedAt: Date.now(), pinned: false };
-  if (kind === 'notes') return { ...base, kind, content: '', language: 'plaintext' };
+  if (kind === 'notes') return { ...base, kind, content: '', language: 'auto' };
   if (kind === 'board') return { ...base, kind, data: null };
   if (kind === 'formatter') return { ...base, kind, content: '' };
   return { ...base, kind, original: '', modified: '', language: 'plaintext' };
@@ -71,7 +71,7 @@ export function parseItem(value: unknown): Item {
     return { ...base, kind: 'board', data: value.data as BoardData | null };
   }
   if (value.kind === 'formatter') {
-    if (!text(value.content)) throw new Error('The backup contains invalid formatter text. Nothing was imported.');
+    if (!text(value.content)) throw new Error('The backup contains invalid JSON document text. Nothing was imported.');
     return { ...base, kind: 'formatter', content: value.content };
   }
   if (!text(value.language, 100)) throw new Error('The backup contains an invalid language.');

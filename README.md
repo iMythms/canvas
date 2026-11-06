@@ -6,10 +6,10 @@ Live app: [canvas.myth.am](https://canvas.myth.am/) · Source: [iMythms/canvas](
 
 ## Four tools, one workspace
 
-- **Notes** — a code editor with syntax highlighting, find and replace, word wrap, and a simple Markdown reading view. Open local text files or start a new note.
+- **Notes** — a code editor with automatic language detection, syntax colors, font sizing, find and replace, and word wrap. Markdown has independently toggleable edit/read panes. Format JavaScript, TypeScript, JSON, HTML, CSS, Markdown, or YAML locally with **Format** or **Shift + Alt + F**; unsupported languages stay unchanged.
 - **Board** — an Excalidraw canvas for diagrams, sketches, and visual thinking. Download boards as `.excalidraw` files.
 - **Compare** — editable original and modified text, split or unified diffs, language selection, and one-click swap.
-- **JSON Formatter** — validate, format, or minify strict JSON; choose two spaces, four spaces, or tabs, then copy or download the output. Formatting preserves the original numeric tokens, including large integers and exponent notation, as well as string escapes, duplicate keys, and property order.
+- **JSON** — validate, format, or minify strict JSON; choose two spaces, four spaces, or tabs, then copy or download the output. Formatting preserves the original numeric tokens, including large integers and exponent notation, as well as string escapes, duplicate keys, and property order.
 
 Search the current mode's documents, pin frequent items, rename them inline, or work in two resizable panes. Appearance settings cover light and dark palettes, typography, and reduced motion. Focus mode hides the surrounding workspace.
 
@@ -19,9 +19,11 @@ Closing a document keeps it saved under **Closed**; deleting it is a separate ac
 
 Documents and appearance settings save automatically to this browser's IndexedDB. Editing and JSON formatting run locally; Canvas has no backend account or document synchronization. Data belongs to the current origin and browser profile, so localhost, another browser, and the hosted site have separate workspaces.
 
-Use **Export workspace** to keep a JSON backup outside the browser, especially before clearing site data or changing devices. Browser storage can be cleared, evicted, or become unavailable; private browsing may discard it when the session ends. Canvas has no service worker and does not guarantee offline loading.
+Use **Export workspace** to keep a JSON backup outside the browser, especially before clearing site data or changing devices. Browser storage can be cleared, evicted, or become unavailable; private browsing may discard it when the session ends.
 
-**Import backup** adds document copies without removing existing documents. Canvas backups also apply their saved appearance settings. Individual document downloads are available from document actions; Formatter also offers a separate download of its generated output. If saving fails or another tab changes the workspace, export the current tab's work before reloading.
+Use **Install app** in the sidebar when offered. Supporting browsers show an installation prompt; others receive platform-specific instructions. The option hides when the browser reports installation or Canvas runs as an installed app. Detection varies by browser. The production service worker caches the app shell and previously loaded local assets for offline use; first visits and uncached tools still need connectivity. Installation does not create a separate backup or synchronize documents.
+
+**Import backup** adds document copies without removing existing documents. Canvas backups also apply their saved appearance settings. Individual document downloads are available from document actions; JSON also offers a separate download of its generated output. If saving fails or another tab changes the workspace, export the current tab's work before reloading.
 
 ## Run locally
 
@@ -56,8 +58,9 @@ Use **⌘** on macOS or **Ctrl** elsewhere.
 | Split right / down | `⌘/Ctrl D` / `⌘/Ctrl Shift D` |
 | Toggle focus mode | `⌘/Ctrl Shift Enter` |
 | Export workspace | `⌘/Ctrl S` |
-| Switch to Notes / Board / Compare / Formatter | `⌘/Ctrl Shift 1–4` |
+| Switch to Notes / Board / Compare / JSON | `⌘/Ctrl Shift 1–4` |
 | Find in editor / editor command palette | `⌘/Ctrl F` / `F1` |
+| Format note | `Shift Alt F` |
 
 Some browsers reserve new and close shortcuts. Use **Alt + Shift + N** or **Alt + Shift + W**, or the on-screen controls, when needed.
 
