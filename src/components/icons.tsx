@@ -16,7 +16,7 @@ import {
   Layout2ColumnIcon,
   Copy01Icon,
   DiamondIcon,
-  Eraser01Icon,
+  EraserIcon,
   File02Icon,
   FolderOpenIcon,
   FrameIcon,
@@ -27,6 +27,7 @@ import {
   LockIcon,
   LockKeyholeIcon,
   LockOpenIcon,
+  Magnet01Icon,
   ArrowExpandIcon,
   ExpandIcon,
   Menu01Icon,
@@ -39,6 +40,7 @@ import {
   PaintBoardIcon,
   SidebarLeft01Icon,
   PencilEdit01Icon,
+  PenTool01Icon,
   PinIcon,
   PlusSignIcon,
   ReplaceIcon,
@@ -89,7 +91,7 @@ export const Code2 = createIcon('Code2', CodeIcon);
 export const Columns2 = createIcon('Columns2', Layout2ColumnIcon);
 export const Copy = createIcon('Copy', Copy01Icon);
 export const Diamond = createIcon('Diamond', DiamondIcon);
-export const Eraser = createIcon('Eraser', Eraser01Icon);
+export const Eraser = createIcon('Eraser', EraserIcon);
 export const FileText = createIcon('FileText', File02Icon);
 export const FolderOpen = createIcon('FolderOpen', FolderOpenIcon);
 export const Frame = createIcon('Frame', FrameIcon);
@@ -100,6 +102,7 @@ export const LayoutTemplate = createIcon('LayoutTemplate', LayoutTemplateIcon);
 export const Lock = createIcon('Lock', LockIcon);
 export const LockKeyhole = createIcon('LockKeyhole', LockKeyholeIcon);
 export const LockOpen = createIcon('LockOpen', LockOpenIcon);
+export const Magnet = createIcon('Magnet', Magnet01Icon);
 export const Maximize = createIcon('Maximize', ArrowExpandIcon);
 export const Maximize2 = createIcon('Maximize2', ExpandIcon);
 export const Menu = createIcon('Menu', Menu01Icon);
@@ -112,6 +115,7 @@ export const MousePointer2 = createIcon('MousePointer2', Cursor01Icon);
 export const Palette = createIcon('Palette', PaintBoardIcon);
 export const PanelLeftClose = createIcon('PanelLeftClose', SidebarLeft01Icon);
 export const Pencil = createIcon('Pencil', PencilEdit01Icon);
+export const PenTool = createIcon('PenTool', PenTool01Icon);
 export const Pin = createIcon('Pin', PinIcon);
 export const Plus = createIcon('Plus', PlusSignIcon);
 export const Replace = createIcon('Replace', ReplaceIcon);

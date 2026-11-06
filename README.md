@@ -2,16 +2,16 @@
 
 A browser-local developer workspace by **Mytham Jasim**. Keep notes, sketch ideas, compare text, and format JSON in one place, with no account or server sync.
 
-Live app: [canvas.myth.am](https://canvas.myth.am/) · Source: [iMythms/canvas](https://github.com/iMythms/canvas) (currently private)
+Live app: [canvas.myth.am](https://canvas.myth.am/) · Source: [iMythms/canvas](https://github.com/iMythms/canvas)
 
 ## Four tools, one workspace
 
-- **Notes** — a code editor with automatic language detection, syntax colors, font sizing, find and replace, and word wrap. Markdown has independently toggleable edit/read panes. Format JavaScript, TypeScript, JSON, HTML, CSS, Markdown, or YAML locally with **Format** or **Shift + Alt + F**; unsupported languages stay unchanged.
-- **Board** — an Excalidraw canvas for diagrams, sketches, and visual thinking. Download boards as `.excalidraw` files.
+- **Notes** — a code editor with automatic or manual language selection, syntax colors, font sizing, find and replace, and word wrap. Markdown has independently toggleable edit/read panes. Format JavaScript, TypeScript, JSON, HTML, CSS, Markdown, or YAML locally with **Format** or **Shift + Alt + F**; unsupported languages stay unchanged. Icon actions copy or download the note.
+- **Board** — an Excalidraw canvas for diagrams and sketches, with magnetic object alignment. Duplicate selections with `⌘/Ctrl D` and download `.excalidraw` files. Split view is disabled for Board.
 - **Compare** — editable original and modified text, split or unified diffs, language selection, and one-click swap.
 - **JSON** — validate, format, or minify strict JSON; choose two spaces, four spaces, or tabs, then copy or download the output. Formatting preserves the original numeric tokens, including large integers and exponent notation, as well as string escapes, duplicate keys, and property order.
 
-Search the current mode's documents, pin frequent items, rename them inline, or work in two resizable panes. Appearance settings cover light and dark palettes, typography, and reduced motion. Focus mode hides the surrounding workspace.
+Search the current mode's documents, pin frequent items, rename them inline, or work in two resizable panes. Appearance settings cover light and dark palettes, typography, and reduced motion. Focus mode hides the surrounding workspace. The sidebar’s collapsed state is shared across modes.
 
 Closing a document keeps it saved under **Closed**; deleting it is a separate action. Double-click a document name or press **F2** to rename it.
 
@@ -27,7 +27,7 @@ Use **Install app** in the sidebar when offered. Supporting browsers show an ins
 
 ## Run locally
 
-Use the Node.js version in [`.nvmrc`](.nvmrc) and npm version in [`package.json`](package.json). With repository access:
+Use the Node.js version in [`.nvmrc`](.nvmrc) and npm version in [`package.json`](package.json).
 
 ```sh
 git clone https://github.com/iMythms/canvas.git
@@ -55,12 +55,14 @@ Use **⌘** on macOS or **Ctrl** elsewhere.
 | Search documents | `⌘/Ctrl K` |
 | New document | `⌘/Ctrl N` |
 | Close document | `⌘/Ctrl W` |
-| Split right / down | `⌘/Ctrl D` / `⌘/Ctrl Shift D` |
+| Split right / down (except Board) | `⌘/Ctrl D` / `⌘/Ctrl Shift D` |
 | Toggle focus mode | `⌘/Ctrl Shift Enter` |
 | Export workspace | `⌘/Ctrl S` |
 | Switch to Notes / Board / Compare / JSON | `⌘/Ctrl Shift 1–4` |
 | Find in editor / editor command palette | `⌘/Ctrl F` / `F1` |
 | Format note | `Shift Alt F` |
+
+In Board, `⌘/Ctrl D` duplicates selected elements and workspace split controls are disabled.
 
 Some browsers reserve new and close shortcuts. Use **Alt + Shift + N** or **Alt + Shift + W**, or the on-screen controls, when needed.
 
@@ -73,6 +75,8 @@ Canvas is a React and TypeScript application built with Vite. The shell and docu
 - [Deployment](docs/DEPLOYMENT.md) — build and hosting configuration for `canvas.myth.am`.
 - [Dependencies](docs/DEPENDENCIES.md) — dependency audit findings and caveats.
 
-## Credit
+## License and credits
 
-The Board is powered by [Excalidraw](https://excalidraw.com/).
+Canvas-authored code is licensed under the [MIT License](LICENSE). Board is powered by [Excalidraw](https://excalidraw.com/). The editor uses Monaco; Notes formatting uses Prettier; icons come from Hugeicons and Material Icon Theme. See [third-party notices](THIRD_PARTY_NOTICES.md) for these and the other libraries, fonts, and their separate license terms.
+
+Inspired by [NotepadXX](https://github.com/almahdi/notepadxx) and [whiteboard.ali.ac](https://whiteboard.ali.ac/).

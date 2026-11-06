@@ -2,7 +2,6 @@
 // workspace captures them before the editor. Match keys, not translated labels.
 export function boardHelpAlternative(keys: readonly string[]): string | null {
   if (!['Ctrl', 'Cmd'].includes(keys[0] ?? '')) return null;
-  if (keys.length === 4 && keys[1] === 'D' && ['Alt', 'Option'].includes(keys[2])) return 'Alt / Option + drag, or use Duplicate';
   if (keys.length === 2 && keys[1] === 'K') return 'Use the selected element’s link control';
   return null;
 }

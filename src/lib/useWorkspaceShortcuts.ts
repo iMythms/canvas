@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 type SplitDirection = 'vertical' | 'horizontal';
 export type WorkspaceShortcutActions = {
+  boardMode?: boolean;
   onNew: () => void;
   onSplit: (direction: SplitDirection) => void;
   onClose: () => void;
@@ -43,7 +44,7 @@ export function workspaceShortcut(event: Pick<KeyboardEvent, 'key' | 'code' | 'm
 /** Called in the window capture phase, before embedded editors handle the event. */
 export function handleWorkspaceShortcut(event: KeyboardEvent, actions: WorkspaceShortcutActions, blocked: boolean): void {
   const shortcut = workspaceShortcut(event);
-  if (shortcut === null || event.defaultPrevented) return;
+  if (shortcut === null || event.defaultPrevented || (actions.boardMode && (shortcut === 'splitRight' || shortcut === 'splitDown'))) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   // Prevent a held key from opening or closing many documents.

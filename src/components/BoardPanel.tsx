@@ -1,7 +1,7 @@
 import { Button } from './ui';
 import { useCallback, useEffect, useId, useRef, useState, type ComponentProps, type CSSProperties, type KeyboardEvent } from "react";
 import { CaptureUpdateAction, DefaultSidebar, Excalidraw, MainMenu, WelcomeScreen } from "@excalidraw/excalidraw";
-import { ArrowUpRight, Circle, Diamond, Eraser, Frame, Hand, ImagePlus, Lock, LockOpen, Maximize, Minus, MousePointer2, Pencil, Square, Type } from "./icons";
+import { ArrowUpRight, Circle, Diamond, Eraser, Frame, Hand, ImagePlus, Lock, LockOpen, Magnet, Maximize, Minus, MousePointer2, PenTool, Square, Type } from "./icons";
 import "@excalidraw/excalidraw/index.css";
 import "../board.css";
 import { boardBackgroundMode, initialBoardBackground, THEME_BOARD_BACKGROUND, type BoardBackgroundMode } from '../lib/boardTheme';
@@ -20,20 +20,20 @@ const boardUIOptions: ComponentProps<typeof Excalidraw>["UIOptions"] = {
 // A null renderer falls back to Excalidraw's iframe; a fragment does not.
 const renderBoardEmbeddable = () => <></>;
 
-type DrawingTool = { type: Exclude<ToolType, "custom">; label: string; shortcut: string; icon: typeof Pencil };
+type DrawingTool = { type: Exclude<ToolType, "custom">; label: string; shortcut: string; icon: typeof PenTool };
 const drawingTools: DrawingTool[] = [
   { type: "selection", label: "Select", shortcut: "V", icon: MousePointer2 },
   { type: "hand", label: "Pan", shortcut: "H", icon: Hand },
-  { type: "freedraw", label: "Draw", shortcut: "P", icon: Pencil },
   { type: "rectangle", label: "Rectangle", shortcut: "R", icon: Square },
   { type: "ellipse", label: "Ellipse", shortcut: "O", icon: Circle },
-  { type: "arrow", label: "Arrow", shortcut: "A", icon: ArrowUpRight },
-  { type: "line", label: "Line", shortcut: "L", icon: Minus },
-  { type: "text", label: "Text", shortcut: "T", icon: Type },
-  { type: "eraser", label: "Eraser", shortcut: "E", icon: Eraser },
   { type: "diamond", label: "Diamond", shortcut: "D", icon: Diamond },
+  { type: "line", label: "Line", shortcut: "L", icon: Minus },
+  { type: "arrow", label: "Arrow", shortcut: "A", icon: ArrowUpRight },
+  { type: "freedraw", label: "Draw", shortcut: "P", icon: PenTool },
+  { type: "text", label: "Text", shortcut: "T", icon: Type },
   { type: "image", label: "Image", shortcut: "9", icon: ImagePlus },
   { type: "frame", label: "Frame", shortcut: "F", icon: Frame },
+  { type: "eraser", label: "Eraser", shortcut: "E", icon: Eraser },
 ];
 
 function ToolButton({ tool, active, disabled, onSelect }: {
@@ -58,7 +58,7 @@ function ToolButton({ tool, active, disabled, onSelect }: {
 /** The durable, JSON-serializable portion of an Excalidraw scene. */
 export type BoardData = {
   elements: SceneElements;
-  appState: Pick<SceneAppState, "viewBackgroundColor" | "scrollX" | "scrollY" | "zoom">;
+  appState: Pick<SceneAppState, "viewBackgroundColor" | "scrollX" | "scrollY" | "zoom"> & { objectsSnapModeEnabled?: boolean };
   files: SceneFiles;
   backgroundMode?: BoardBackgroundMode;
 };
@@ -80,7 +80,7 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
   // initialData is read once by Excalidraw. Keep it stable as the host saves.
   const [initialData] = useState(() => ({
     ...value,
-    appState: { ...value?.appState, viewBackgroundColor: initialBoardBackground(value?.appState.viewBackgroundColor, value?.backgroundMode) },
+    appState: { ...value?.appState, viewBackgroundColor: initialBoardBackground(value?.appState.viewBackgroundColor, value?.backgroundMode), objectsSnapModeEnabled: value?.appState.objectsSnapModeEnabled ?? true },
   }));
   const lastSaved = useRef(value ? JSON.stringify(value) : "");
   const onChangeRef = useRef(onChange);
@@ -89,6 +89,7 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
   const clearDialogRef = useRef<HTMLDialogElement>(null);
   const clearDialogTitle = useId();
   const clearDialogDescription = useId();
+  const [snapEnabled, setSnapEnabled] = useState(value?.appState.objectsSnapModeEnabled ?? true);
   const [confirmClear, setConfirmClear] = useState(false);
   const [api, setApi] = useState<EditorAPI | null>(null);
   const [toolState, setToolState] = useState<{ type: ToolType; locked: boolean; editorHeight: number }>({ type: "selection", locked: false, editorHeight: 360 });
@@ -104,7 +105,7 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
 
   useEffect(() => {
     // Excalidraw mounts Help under body; its public API does not expose the
-    // shortcut rows. Adapt only the two combinations owned by the workspace.
+    // shortcut rows. Adapt the link combination owned by the workspace.
     const observer = new MutationObserver((records) => {
       for (const record of records) for (const node of record.addedNodes) {
         if (!(node instanceof HTMLElement)) continue;
@@ -127,6 +128,7 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
   }, [api, focus, focusDrawing]);
 
   const handleChange = useCallback<ChangeHandler>((elements, appState, files) => {
+    setSnapEnabled(appState.objectsSnapModeEnabled);
     const type = appState.activeTool.type;
     const locked = appState.activeTool.locked;
     const editorHeight = appState.height;
@@ -139,6 +141,7 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
         scrollX: appState.scrollX,
         scrollY: appState.scrollY,
         zoom: appState.zoom,
+        objectsSnapModeEnabled: appState.objectsSnapModeEnabled,
       },
       files,
       backgroundMode: boardBackgroundMode(appState.viewBackgroundColor),
@@ -184,6 +187,7 @@ function BoardEditor({ value, theme, accent, focus = false, onChange }: Omit<Boa
             if (active.type !== "custom") api.setActiveTool({ type: active.type, locked: !active.locked });
             focusDrawing();
           }}>{toolState.locked ? <Lock size={18} strokeWidth={1.7} aria-hidden="true" /> : <LockOpen size={18} strokeWidth={1.7} aria-hidden="true" />}</Button>
+          <Button type="button" className="board-tool" data-board-control="" aria-label="Snap to objects" title="Snap to objects" aria-pressed={snapEnabled} disabled={!api} onClick={() => { api?.updateScene({ appState: { objectsSnapModeEnabled: !api.getAppState().objectsSnapModeEnabled } }); focusDrawing(); }}><Magnet size={18} strokeWidth={1.7} aria-hidden="true" /></Button>
           <Button type="button" className="board-tool" data-board-control="" aria-label="Fit drawing" title="Fit drawing" disabled={!api} onClick={() => {
             api?.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.85, animate: false });
             focusDrawing();

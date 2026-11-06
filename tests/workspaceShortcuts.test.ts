@@ -39,7 +39,7 @@ test('claims handled events before editors and ignores blocked or repeated actio
   assert.deepEqual(calls, []);
 });
 
-test('workspace commands claim conflicting board shortcuts before the engine', () => {
+test('workspace commands claim shortcuts in other modes', () => {
   for (const [keyName, shiftKey, expected] of [
     ['d', false, 'vertical'], ['D', true, 'horizontal'], ['k', false, 'search'],
     ['s', false, 'export'], ['n', false, 'new'], ['w', false, 'close'],
@@ -60,4 +60,11 @@ test('modal and editable contexts block workspace actions even inside an editor'
   assert.equal(shortcutBlockedForContext(false, true, true, true), true);
   assert.equal(shortcutBlockedForContext(false, false, false, true), true);
   assert.equal(shortcutBlockedForContext(false, false, true, true), false);
+});
+
+ test('board leaves duplicate and shifted duplicate events untouched', () => {
+  const calls: string[] = [];
+  const actions: WorkspaceShortcutActions = { boardMode: true, onNew() {}, onSplit: () => calls.push('split'), onClose() {}, onSearch() {}, onExport() {}, onFocus() {}, onMode() {} };
+  for (const shiftKey of [false, true]) handleWorkspaceShortcut(key({ key: 'd', metaKey: true, shiftKey, preventDefault: () => calls.push('prevent'), stopImmediatePropagation: () => calls.push('stop') }), actions, false);
+  assert.deepEqual(calls, []);
 });

@@ -1,0 +1,2 @@
+.note-toolbar-actions,.note-file-actions { display:flex;align-items:center;flex-wrap:nowrap;flex-shrink:0;gap:var(--space-2); }
+.note-file-actions .ui-button { width:var(--control-height-compact);min-width:var(--control-height-compact);padding:0;border-radius:var(--control-icon-radius); }

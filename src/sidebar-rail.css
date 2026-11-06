@@ -1,0 +1,5 @@
+.sidebar-rail > .ui-button,.sidebar-rail > .rail-divider,.sidebar-rail > .rail-bottom { flex-shrink:0; }
+.sidebar-rail .rail-documents { display:flex;flex-direction:column;align-items:center;gap:var(--space-4);min-height:0;overflow-y:auto;flex-shrink:1;width:100%; }
+.sidebar-rail .rail-document-group { display:flex;flex-direction:column;align-items:center;gap:var(--space-4);flex-shrink:0; }
+.sidebar-rail .rail-documents .ui-button { width:var(--control-height);height:var(--control-height);min-height:var(--control-height);border-radius:var(--control-radius);flex-shrink:0; }
+.sidebar-rail .rail-documents > .rail-divider { flex-shrink:0; }

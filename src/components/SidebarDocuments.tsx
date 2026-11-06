@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { createPortal } from 'react-dom';
 import { ChevronRight, Code2, Columns2, FileText, GitCompareArrows, Pin, Shapes, X } from './icons';
 import { Button } from './ui';
+import NoteLanguageIcon from './NoteLanguageIcon';
 import { languages, type Item } from '../lib/workspace';
 import { documentSummary, groupDocuments } from '../lib/documentPreview';
 import '../sidebar-documents.css';
@@ -128,7 +129,7 @@ export default function SidebarDocuments({ openItems, closedItems, activeId, ren
   }, [item?.id, dismiss]);
 
   const renderDocument = (document: Item, closed = false) => {
-    const Icon = document.kind === 'notes' && !['markdown', 'plaintext'].includes(document.language) ? Code2 : details[document.kind].icon;
+    const Icon = details[document.kind].icon;
     const expanded = previewId === document.id;
     return <div key={document.id} className={`sidebar-document ${document.id === activeId ? 'selected' : ''} ${expanded && enabled ? 'previewed' : ''}`}
       onMouseEnter={event => { if (renameId !== document.id) show(document, event.currentTarget, 'pointer'); }} onMouseLeave={leave}
@@ -144,7 +145,7 @@ export default function SidebarDocuments({ openItems, closedItems, activeId, ren
           if (event.key === 'F2') { event.preventDefault(); dismiss(); onRename(document); }
           if (event.key === 'ArrowRight') { event.preventDefault(); show(document, event.currentTarget.parentElement!, 'keyboard', true); if (expanded) { card.current?.querySelector<HTMLButtonElement>('button')?.focus(); focusCard.current = false; } }
         }}>
-        <span className={`item-type-icon ${Icon === Code2 ? 'code' : ''}`}><Icon size={15}/></span><span className="item-link-title">{document.name || 'Untitled'}</span>
+        <span className={`item-type-icon ${Icon === Code2 ? 'code' : ''}`}>{document.kind === 'notes' ? <NoteLanguageIcon note={document} size={16}/> : <Icon size={15}/>}</span><span className="item-link-title">{document.name || 'Untitled'}</span>
       </Button>}
       {!closed && <Button className="sidebar-document-close" aria-label={`Close ${document.name || 'Untitled'}`} title="Close document" onClick={() => { dismiss(); onClose(document.id); }}><X size={12}/></Button>}
     </div>;
@@ -169,7 +170,7 @@ export default function SidebarDocuments({ openItems, closedItems, activeId, ren
       <div className="document-preview-heading"><Icon size={16}/><div><strong>{item.name || 'Untitled'}</strong><span>{details[item.kind].label}{language ? ` · ${language}` : ''}</span></div></div>
       <div className="document-preview-content"><DocumentContent item={item}/></div>
       <p className="document-preview-summary">{documentSummary(item)}</p>
-      <div className="document-preview-actions"><Button size="sm" aria-label={item.pinned ? 'Unpin document' : 'Pin document'} aria-pressed={item.pinned} onClick={() => onPin(item)}><Pin size={14}/>{item.pinned ? 'Unpin' : 'Pin'}</Button>{canSplit && <Button size="sm" aria-label="Open in other pane" onClick={() => { dismiss(); onSplit(item); }}><Columns2 size={14}/>Split</Button>}<Button size="sm" variant="outline" onClick={() => { dismiss(); onOpen(item); }}>{closed ? 'Reopen' : 'Open'}</Button></div>
+      <div className="document-preview-actions"><Button size="sm" aria-label={item.pinned ? 'Unpin document' : 'Pin document'} aria-pressed={item.pinned} onClick={() => onPin(item)}><Pin size={14}/>{item.pinned ? 'Unpin' : 'Pin'}</Button>{canSplit && item.kind !== 'board' && <Button size="sm" aria-label="Open in other pane" onClick={() => { dismiss(); onSplit(item); }}><Columns2 size={14}/>Split</Button>}<Button size="sm" variant="outline" onClick={() => { dismiss(); onOpen(item); }}>{closed ? 'Reopen' : 'Open'}</Button></div>
     </div>, document.body)}
   </div>;
 }

@@ -161,10 +161,10 @@
 .board-panel.board-panel--focus .excalidraw .layer-ui__wrapper .layer-ui__wrapper__footer-left.zen-mode-transition,
 .board-panel.board-panel--focus .excalidraw .layer-ui__wrapper .undo-redo-buttons.zen-mode-transition { transform:none;transition:none; }
 .board-panel--focus .excalidraw .layer-ui__wrapper .selected-shape-actions.zen-mode-transition.transition-left { transform:none;transition:none; }
-/* Keep every tool directly reachable, including in narrow split panes. */
-@container (max-width:240px) {
-  .board-drawing-toolbar { top:72px;left:12px;max-width:calc(100% - 24px); }
-}
+/* In the engine's mobile layout the menu lives in the bottom bar, so the
+   drawing strip can use balanced insets instead of reserving a desktop menu. */
+.board-panel:has(.excalidraw--mobile) .board-drawing-toolbar { left:12px;right:12px;max-width:calc(100% - 24px); }
+.board-panel:has(.excalidraw--mobile) .board-tool { width:44px;min-width:44px;height:44px;min-height:44px; }
 
 /* Excalidraw uses viewport height for menus, but this editor can be smaller. */
 .board-panel .excalidraw .dropdown-menu .dropdown-menu-container {
@@ -311,6 +311,56 @@
 .board-panel .excalidraw .HintViewer { display: none; }
 .board-panel .excalidraw .selected-shape-actions .Island,
 .board-panel .excalidraw .App-bottom-bar > .Island { padding:var(--space-6); }
+/* Allow four full-sized controls plus the engine's 4px vertical scrollbar. */
+.board-panel .excalidraw .selected-shape-actions .Island {
+  width:max(12.5rem,calc(4 * var(--control-height) + 3 * var(--space-2) + 2 * var(--space-6) + 6px));
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.board-panel .excalidraw .selected-shape-actions .Island > .panelColumn {
+  min-height:0;
+  overflow-y:auto;
+  /* Keep focus rings inside the scroller without changing control positions. */
+  margin:-2px -10px -2px -2px;
+  padding:2px 10px 2px 2px;
+}
+/* The mobile footer already has its own inner inset. Avoid stacking desktop
+   panel padding around it, and give every action the same 44px touch target. */
+.board-panel .excalidraw .App-bottom-bar {
+  --bar-padding:8px;
+  padding-top:max(78px,var(--sat,0px));
+}
+.board-panel .excalidraw .App-bottom-bar > .Island {
+  padding:4px;
+  border-radius:calc(var(--control-radius) + 5px);
+}
+.board-panel .excalidraw .App-toolbar-content { padding:0;gap:2px; }
+.board-panel .excalidraw .App-toolbar-content :is(.main-menu-trigger, .ToolIcon) {
+  width:44px;
+  height:44px;
+  border-radius:var(--control-radius);
+}
+.board-panel .excalidraw .App-toolbar-content .main-menu-trigger {
+  border:0;
+  box-shadow:none;
+}
+.board-panel .excalidraw .App-toolbar-content .ToolIcon__icon {
+  width:44px;
+  height:44px;
+  border-radius:var(--control-radius);
+}
+.board-panel .excalidraw .App-toolbar-content > div { display:flex;gap:2px; }
+.board-panel .excalidraw .App-toolbar-content .dropdown-menu--mobile { bottom:54px; }
+.board-panel .excalidraw--mobile .dropdown-menu .dropdown-menu-item { min-height:44px; }
+.board-panel .excalidraw .App-mobile-menu {
+  --control-height:44px;
+  width:auto;
+  margin:6px -2px 6px 6px;
+  padding:2px 10px 2px 2px;
+}
+.board-panel .excalidraw .App-mobile-menu .panelColumn { padding:0; }
+.board-panel .excalidraw .App-mobile-menu .buttonList :is(label, button, .zIndexButton) { border-radius:calc(var(--control-radius) - var(--space-4)); }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn {
   row-gap: var(--space-5);
   font-family: var(--canvas-font);
@@ -335,6 +385,23 @@
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList .active {
   color: var(--canvas-accent);
 }
+/* Only Align has a second group of ToolIcons nested in the button list.
+   Excalidraw 0.18 inserts a flex spacer and inline negative margin between the
+   axes. Replace that layout with matching grids, including distribution's
+   fourth column, without changing unrelated property rows or translated text. */
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn > fieldset > .buttonList:has(> div > .ToolIcon) {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,var(--control-height)));
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn > fieldset > .buttonList:has(> div > .ToolIcon) > div:empty { display:none; }
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn > fieldset > .buttonList:has(> div > .ToolIcon) > div:has(> .ToolIcon) {
+  display:grid !important;
+  grid-template-columns:inherit;
+  grid-column:1 / -1;
+  gap:inherit !important;
+  margin:0 !important;
+}
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .panelColumn > fieldset > .buttonList:has(> div > .ToolIcon) .ToolIcon { width:100%; }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList label:has(input[name="font-size"]) svg { display: none; }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .buttonList label:has(input[name="font-size"])::after {
   font: 500 var(--ui-text)/1 var(--canvas-font);
@@ -351,6 +418,9 @@
   border-radius: var(--control-radius-small);
 }
 .board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .range-wrapper { padding-top: var(--space-4);padding-bottom: 24px; }
+/* Keep the current opacity value inside the range after a panel resize; the
+   engine otherwise retains a left offset measured at the previous width. */
+.board-panel .excalidraw :is(.selected-shape-actions, .App-mobile-menu) .value-bubble { left:auto !important;right:0;transform:none; }
 
 /* Excalidraw renders this section with inline spacing. Give its heading,
    swatches and the reset action the same 11px action-content inset. */

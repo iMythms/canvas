@@ -1,0 +1,7 @@
+/*!
+Material Icon Theme SVGs: https://github.com/material-extensions/vscode-material-icon-theme
+Source: icons/*.svg at f368264282ef14ee7feb012fd54e825181eff9c3 (unmodified).
+Upstream language associations: src/core/icons/languageIcons.ts; shell uses shellscript.
+License: MIT, Copyright (c) 2025 Material Extensions. Full notice: ../assets/languages/LICENSE.
+*/
+.note-language-icon { display:block;flex-shrink:0;object-fit:contain; }

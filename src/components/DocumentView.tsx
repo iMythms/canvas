@@ -1,10 +1,14 @@
-import { lazy, memo, Suspense, useDeferredValue, useState, type CSSProperties } from 'react';
+import { lazy, memo, Suspense, useDeferredValue, useEffect, useState, type CSSProperties } from 'react';
 import { detectLanguage, togglePane } from '../lib/noteMode';
 import PanelBoundary from './PanelBoundary';
 import MarkdownPreview from './MarkdownPreview';
-import { languages, type Item } from '../lib/workspace';
+import { languages, type Item, type Note } from '../lib/workspace';
 import { Button, Select } from './ui';
 import type { ResolvedAppearance } from '../lib/themes';
+import { ArrowDownToLine, Check, Copy } from './icons';
+import { downloadFile } from '../lib/storage';
+import { noteDownloadFilename } from '../lib/noteDownload';
+import '../notes.css';
 
 const NoteEditor = lazy(() => import('./NoteEditor'));
 const ComparePanel = lazy(() => import('./ComparePanel'));
@@ -19,6 +23,36 @@ type Props = {
   onChange: (id: string, patch: Partial<Item>) => void;
 };
 
+function NoteActions({ note }: { note: Note }) {
+  const [feedback, setFeedback] = useState<{ content: string; copied: boolean } | null>(null);
+  const currentFeedback = feedback?.content === note.content ? feedback : null;
+  const message = currentFeedback ? currentFeedback.copied ? 'Copied note content' : 'Could not copy. Select and copy the note content.' : '';
+
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 2500);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
+  const copyNote = async () => {
+    const content = note.content;
+    try {
+      await navigator.clipboard.writeText(content);
+      setFeedback({ content, copied: true });
+    } catch {
+      setFeedback({ content, copied: false });
+    }
+  };
+
+  return <div className="note-file-actions" role="group" aria-label="Note actions">
+    <Button size="sm" title={message || 'Copy note content'} aria-label="Copy note content" disabled={!note.content} onClick={() => void copyNote()}>
+      {currentFeedback?.copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+    </Button>
+    <Button size="sm" title="Download note" aria-label="Download note" disabled={!note.content} onClick={() => downloadFile(noteDownloadFilename(note), note.content)}><ArrowDownToLine size={14} aria-hidden="true" /></Button>
+    <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{message}</span>
+  </div>;
+}
+
 export default memo(function DocumentView({ item, appearance, focus, onFontSizeChange, onChange }: Props) {
   const [panes, setPanes] = useState({ edit: true, read: true });
   const [toolsContainer, setToolsContainer] = useState<HTMLDivElement | null>(null);
@@ -32,7 +66,7 @@ export default memo(function DocumentView({ item, appearance, focus, onFontSizeC
   return <PanelBoundary key={item.id}>
     <Suspense fallback={<div className="panel-loading">Loading…</div>}>
       {item.kind === 'notes' ? <div className="note-preview" style={{ '--markdown-size': `${appearance.codeFontSize}px` } as CSSProperties}>
-        <div className="editor-toolbar note-toolbar">{noteControls}<div ref={setToolsContainer} className="note-tools-slot"/></div>
+        <div className="editor-toolbar note-toolbar">{noteControls}<div className="note-toolbar-actions"><div ref={setToolsContainer} className="note-tools-slot"/><NoteActions key={item.id} note={item}/></div></div>
         <div className="markdown-layout">
           {(language !== 'markdown' || panes.edit) && <NoteEditor toolsContainer={toolsContainer} id={item.id} value={item.content} language={language} languageChoice={item.language} theme={appearance.mode} appearance={appearance} onChange={content => onChange(item.id, { content })}/>}
           {language === 'markdown' && panes.read && <div className="reading-scroll"><MarkdownPreview content={item.content} appearance={appearance}/></div>}

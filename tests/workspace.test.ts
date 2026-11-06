@@ -52,39 +52,45 @@ test('Canvas export round trips every item, selection, scene asset, and appearan
   assert.deepEqual(imported.appearance, workspace.appearance);
 });
 
-test('per-mode sidebar preferences survive browser reload and backup round trips independently', () => {
-  const workspace = { ...fixture(), sidebarCollapsed: { notes: true, board: false, compare: true, formatter: false } };
-  const reloaded = parseWorkspace(JSON.parse(JSON.stringify(workspace)));
-  assert.deepEqual(reloaded, workspace);
-  const restored = parseWorkspace(JSON.parse(exportWorkspace(reloaded)).workspace);
-  assert.deepEqual(restored.sidebarCollapsed, workspace.sidebarCollapsed);
-  assert.deepEqual(restored.items, workspace.items);
-  const switched = openDocument(restored, restored.items[1]!);
-  assert.equal(switched.mode, 'board');
-  assert.equal(switched.sidebarCollapsed?.board, false);
-  assert.equal(switched.sidebarCollapsed?.notes, true);
-});
-
-test('older workspaces and backups without sidebar preferences retain all content', () => {
-  const workspace = fixture();
-  const reloaded = parseWorkspace(JSON.parse(JSON.stringify(workspace)));
-  assert.deepEqual(reloaded, workspace);
-  for (const mode of ['notes', 'board', 'compare', 'formatter'] as const) {
-    assert.equal(reloaded.sidebarCollapsed?.[mode] ?? false, false);
+test('shared sidebar preference survives mode changes, document creation, reload and backup', () => {
+  for (const collapsed of [true, false]) {
+    let workspace: Workspace = { ...fixture(), sidebarCollapsed: collapsed };
+    for (const mode of ['notes', 'board', 'compare', 'formatter'] as const) {
+      // Mode selection may create the first JSON document before opening it.
+      const item = workspace.items.find(document => document.kind === mode) ?? {
+        id: 'json-1', kind: 'formatter' as const, name: 'JSON', updatedAt: 1, pinned: false, content: '{}',
+      };
+      if (!workspace.items.includes(item)) workspace = { ...workspace, items: [...workspace.items, item] };
+      workspace = openDocument({ ...workspace, mode }, item);
+      assert.equal(workspace.sidebarCollapsed, collapsed);
+      workspace = parseWorkspace(JSON.parse(JSON.stringify(workspace)));
+      assert.equal(workspace.sidebarCollapsed, collapsed);
+    }
+    const restored = parseWorkspace(JSON.parse(exportWorkspace(workspace)).workspace);
+    assert.equal(restored.sidebarCollapsed, collapsed);
+    assert.deepEqual(restored.items, workspace.items);
   }
-  assert.deepEqual(parseImport(exportWorkspace(workspace)).items, workspace.items);
 });
 
-test('sidebar preferences accept only known modes and booleans without rejecting documents', () => {
+test('legacy mixed sidebar preferences migrate from the saved active mode', () => {
   const workspace = fixture();
-  const parsed = parseWorkspace({ ...workspace, sidebarCollapsed: { notes: true, board: 'false', compare: 0, formatter: false, unknown: true } });
-  assert.deepEqual(parsed.sidebarCollapsed, { notes: true, formatter: false });
-  assert.deepEqual(parsed.items, workspace.items);
-  assert.deepEqual(parseImport(envelope({ ...workspace, sidebarCollapsed: { notes: 'true' } })).items, workspace.items);
-  for (const sidebarCollapsed of [undefined, null, false, 'true', [], [true]]) {
+  const preferences = { notes: true, board: false, compare: true, formatter: false };
+  for (const mode of ['notes', 'board', 'compare', 'formatter'] as const) {
+    const restored = parseWorkspace({ ...workspace, mode, sidebarCollapsed: preferences });
+    assert.equal(restored.sidebarCollapsed, preferences[mode]);
+    assert.deepEqual(restored.items, workspace.items);
+    assert.equal(parseWorkspace(JSON.parse(exportWorkspace(restored)).workspace).sidebarCollapsed, preferences[mode]);
+  }
+});
+
+test('missing or malformed sidebar preferences retain documents and default to expanded', () => {
+  const workspace = fixture();
+  for (const sidebarCollapsed of [undefined, null, 'true', [], [true], {}, { notes: true, compare: 'true' }]) {
     const restored = parseWorkspace({ ...workspace, sidebarCollapsed });
     assert.equal(restored.sidebarCollapsed, undefined);
+    assert.equal(restored.sidebarCollapsed ?? false, false);
     assert.deepEqual(restored.items, workspace.items);
+    assert.deepEqual(parseImport(envelope({ ...workspace, sidebarCollapsed })).items, workspace.items);
   }
 });
 

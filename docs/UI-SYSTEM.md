@@ -4,9 +4,9 @@
 
 Canvas has four modes: **Notes**, **Board**, **Compare**, and **JSON**. The mode switcher selects the document type shown in the sidebar and workspace. Notes use Monaco for plain text and supported languages, with a Markdown read view; choose the code language from the note toolbar. Board embeds Excalidraw. Compare uses Monaco's side-by-side diff editor. JSON has source and output panes for strict JSON.
 
-The sidebar contains search, the current mode's document list, create actions, appearance, file open, backup import/export, and help. Search matches names and note/JSON content. Select a document in the sidebar to open it. Double-click its name or press F2 to rename inline. Pinned documents are grouped above the remaining documents, separated by a divider. Hovering or focusing a row reveals its preview and actions; opening a preview keeps the source row highlighted without marking it as the current document. ArrowRight enters a preview and Escape dismisses it and returns focus. Closing a document removes it from the open workspace but preserves its saved content and pin; closing the document-list disclosure only hides the list, and reopening it retains the documents. Delete is a separate document action. The sidebar can be fully hidden in **Focus mode**, which maximizes the workspace, or collapsed to a shortcut rail. The collapsed rail retains mode selection, search, new document, appearance, and help. Collapse state is remembered per mode; focus hides the surrounding shell.
+The sidebar contains search, the current mode's document list, create actions, appearance, file open, backup import/export, and help. Search matches names and note/JSON content. Select a document in the sidebar to open it. Double-click its name or press F2 to rename inline. Pinned documents are grouped above the remaining documents, separated by a divider. Hovering or focusing a row reveals its preview and actions; opening a preview keeps the source row highlighted without marking it as the current document. ArrowRight enters a preview and Escape dismisses it and returns focus. Closing a document removes it from the open workspace but preserves its saved content and pin; closing the document-list disclosure only hides the list, and reopening it retains the documents. Delete is a separate document action. The sidebar can be fully hidden in **Focus mode**, which maximizes the workspace, or collapsed to a shortcut rail. The collapsed rail shows open documents from the current mode in the same pinned-first order, with named tooltips and an active indication. It retains search, new document, appearance, installation, and help; mode selection stays in the top bar. Collapse state is shared across all modes and survives reload; focus hides the surrounding shell. Older per-mode preferences migrate using the previously active mode’s visible state.
 
-Pinning and document actions are available in the top bar next to the split controls. The workspace can show two panes arranged side-by-side or stacked; the divider can be dragged, adjusted with arrow keys, and reset by double-clicking. The split and divider ratio live in component state for the current session; they are not persisted.
+Pinning and document actions are available in the top bar next to the split controls. Notes, Compare, and JSON can show two panes arranged side-by-side or stacked; the divider can be dragged, adjusted with arrow keys, and reset by double-clicking. The split and divider ratio live in component state for the current session; they are not persisted. Board keeps the split buttons visible but disabled so its native duplicate shortcut remains available.
 
 ## Shared controls and visual language
 
@@ -22,14 +22,16 @@ Canvas handles these shortcuts when the corresponding key event reaches the page
 | --- | --- |
 | Find a document | `⌘/Ctrl K` |
 | New document in current mode | `⌘/Ctrl N` |
-| Split right | `⌘/Ctrl D` |
-| Split down | `⌘/Ctrl Shift D` |
+| Split right (except Board) | `⌘/Ctrl D` |
+| Split down (except Board) | `⌘/Ctrl Shift D` |
 | Close active document | `⌘/Ctrl W` |
 | Toggle focus mode | `⌘/Ctrl Shift Enter` |
 | Export workspace backup | `⌘/Ctrl S` |
 | Select mode 1–4 (Notes, Board, Compare, JSON) | `⌘/Ctrl Shift 1–4` |
 | New document fallback | `⌥/Alt Shift N` |
 | Close active document fallback | `⌥/Alt Shift W` |
+
+In Board, `⌘/Ctrl D` duplicates selected elements.
 
 Monaco also provides editor find (`⌘/Ctrl F`) and its command palette (`F1`). Browsers and operating systems may reserve or intercept shortcuts, so availability can vary by browser and platform.
 
@@ -49,11 +51,11 @@ JSON accepts strict JSON, offers two-space, four-space, or tab indentation, and 
 
 Notes, Compare, and JSON use one horizontally scrolling toolbar row with 8px insets and 36px desktop controls. Rounded containers and their children use concentric radii; icon-only actions are square. The sidebar has one create action, full language labels stay visible, and search text ellipsizes beside its shortcut. Find/Replace keeps Monaco's behavior with Canvas styling. Pointer actions suppress keyboard focus rings; keyboard navigation retains them.
 
-New notes use Auto language selection, with manual overrides available. The toolbar font selector updates the saved code-size preference and scales Markdown reading text. Edit and Read independently toggle a Markdown pane while keeping one visible. The renderer supports common Markdown constructs and simple frontmatter; it is not a complete CommonMark parser. Source HTML stays inert and unsafe link destinations are rejected. Syntax coloring is lexical, including Markdown code fences, rather than semantic symbol analysis.
+New notes use Auto language selection, with manual overrides available. Expanded and collapsed sidebars show local Material Icon Theme SVGs for the detected or manually selected language, covering all 15 supported languages. The toolbar font selector updates the saved code-size preference and scales Markdown reading text. Edit and Read independently toggle a Markdown pane while keeping one visible. The renderer supports common Markdown constructs and simple frontmatter; it is not a complete CommonMark parser. Source HTML stays inert and unsafe link destinations are rejected. Syntax coloring is lexical, including Markdown code fences, rather than semantic symbol analysis.
 
-Format runs in a worker using lazy Prettier parsers for JavaScript, TypeScript, HTML, CSS, Markdown and YAML; JSON reuses the lossless token formatter. Current text determines Auto mode. Formatting is one undoable edit with mapped selections, and stale results are discarded after content or language changes. Unsupported languages and errors leave text unchanged. Format is available while the Edit pane is open.
+Format runs in a worker using lazy Prettier parsers for JavaScript, TypeScript, HTML, CSS, Markdown and YAML; JSON reuses the lossless token formatter. Current text determines Auto mode. Formatting is one undoable edit with mapped selections, and stale results are discarded after content or language changes. Unsupported languages and errors leave text unchanged. Format is available while the Edit pane is open. Icon-only Copy and Download controls remain available in Markdown Read-only mode. They use the current raw note content; downloads preserve an explicit filename extension or choose one from the current language.
 
-Canvas dark uses the supplied palette under the Canvas name. Existing explicit appearance preferences remain intact. Board tools are directly accessible in the toolbar, and built-in board fonts remain unchanged. Native double-click/double-tap text creation uses Select. The viewport restricts browser zoom where supported, touch inputs use at least 16px text, and board canvas zoom remains available.
+Canvas dark uses the supplied palette under the Canvas name. Existing explicit appearance preferences remain intact. Board tools are directly accessible in one scrolling toolbar: Select, Pan, Rectangle, Ellipse, Diamond, Line, Arrow, Draw, Text, Image, Frame, Eraser, then Lock, Snap, and Fit. Draw uses Hugeicons PenTool01Icon and Eraser uses an eraser glyph. Built-in board fonts remain unchanged. Object snapping defaults on and its setting is saved per board. Alignment controls share columns and gaps; properties scroll inside the rounded panel. Mobile drawing and bottom bars are 54px tall with 44px touch targets and symmetric toolbar insets. Native double-click/double-tap text creation uses Select. The viewport restricts browser zoom where supported, touch inputs use at least 16px text, and board canvas zoom remains available.
 
 ## Dependency notes
 

@@ -59,6 +59,48 @@ syntax colors are lexical rather than semantic. External Xiaolai fallback-font
 requests were blocked by CSP during board checks. Production deployment of
 these refinements has not been verified.
 
+### Board and sidebar follow-up (2026-11-06)
+
+Integrated checks passed: `npm test` (80/80), `npm run typecheck`,
+`npm run build`, and `git diff --check`. The subsequent toolbar icon/order edit
+also passed `npm run build` (including typecheck) and `git diff --check`.
+
+- Root's isolated preview verified Cmd+D duplicates Board elements without a
+  workspace split, disabled Board split controls, visible edge/center snapping,
+  snap-off persistence after reload, and Fit drawing bringing content into view.
+  Notes Cmd+D still splits.
+- Delegate previews verified aligned properties controls and internal scrolling
+  at 320px, 390px, 768px, desktop and short landscape in light/dark themes.
+  Mobile bars are 54px tall with 44px targets; all 15 toolbar controls remain
+  reachable by scrolling and keyboard navigation.
+- The collapsed rail filters open documents to the current mode, preserves
+  pinned-first ordering, switches between distinct Boards, and excludes closed
+  documents. Topbar mode switching and reopening closed documents were checked.
+- The final shape grouping and PenTool01Icon/eraser glyphs were checked at
+  1280×800 and 390×844; the toolbar remains one row with horizontal scrolling.
+
+Owned preview tabs and isolated servers were closed. Physical-device touch and
+Safari scrolling remain unverified. No sync/authentication services were added;
+sync was deferred by the user. Installed-icon theme switching was researched but
+not implemented because authored light/dark variants lack a supported PWA path.
+
+### Shared sidebar, Notes actions and icons (2026-11-06)
+
+`npm test` passed 88/88; `npm run build` (including typecheck) and
+`git diff --check` passed. New cases cover shared sidebar state and legacy
+migration, Notes download extensions, and Auto/manual icon coverage for all
+15 languages, including fallback and local asset validation.
+
+Root's isolated 5192 preview verified collapsed and expanded state across all
+four modes and collapsed persistence after reload. Auto Markdown and manually
+selected Python produced distinct local icons; the collapsed rail used the same
+Python icon. Copy and Download have no visible labels, retain accessible names,
+and fit in one scrolling row at 390px. Read-only Markdown retained both actions;
+a downloaded `.md` file matched the note bytes exactly, and manual Python used
+`.py`. Simulated clipboard success copied the exact content and simulated denial
+produced failure feedback. Actual OS clipboard permissions were not tested.
+Owned tab/server closed; user workspace data was not changed.
+
 ### Earlier browser observations (2026-11-05)
 
 Observed in the in-app browser (IAB): a note survives reload; closing and

@@ -16,7 +16,7 @@ export type Workspace = {
   mode: Mode;
   appearance: Appearance;
   openTabs?: string[];
-  sidebarCollapsed?: Partial<Record<Mode, boolean>>;
+  sidebarCollapsed?: boolean;
 };
 
 export const languages = [
@@ -87,15 +87,14 @@ export function parseWorkspace(value: unknown): Workspace {
   const openTabs = Array.isArray(value.openTabs) ? [...new Set(value.openTabs.filter((id): id is string => typeof id === 'string' && items.some(item => item.id === id)))] : undefined;
   // A malformed optional preference must never prevent documents from loading.
   const sidebarPreferences = value.sidebarCollapsed;
-  const sidebarCollapsed: Workspace['sidebarCollapsed'] = object(sidebarPreferences)
-    ? Object.fromEntries(modes.filter(kind => typeof sidebarPreferences[kind] === 'boolean').map(kind => [kind, sidebarPreferences[kind]]))
-    : undefined;
+  const savedSidebar = object(sidebarPreferences) ? sidebarPreferences[value.mode] : sidebarPreferences;
+  const sidebarCollapsed = typeof savedSidebar === 'boolean' ? savedSidebar : undefined;
   const active = {} as Workspace['active'];
   for (const kind of modes) {
     const candidates = items.filter(item => item.kind === kind && (!openTabs || openTabs.includes(item.id)));
     active[kind] = candidates.find(item => item.id === (value.active as Record<string, unknown>)[kind])?.id ?? candidates[0]?.id ?? null;
   }
-  return { version: 1, items, active, mode: value.mode, appearance: normalizeAppearance(value.appearance), ...(openTabs ? { openTabs } : {}), ...(sidebarCollapsed ? { sidebarCollapsed } : {}) };
+  return { version: 1, items, active, mode: value.mode, appearance: normalizeAppearance(value.appearance), ...(openTabs ? { openTabs } : {}), ...(sidebarCollapsed !== undefined ? { sidebarCollapsed } : {}) };
 }
 
 export function parseImport(source: string): { items: Item[]; source: string; appearance?: Appearance } {

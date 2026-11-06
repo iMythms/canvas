@@ -2,9 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boardHelpAlternative } from '../src/lib/boardShortcuts.ts';
 
-test('board help replaces only workspace-owned duplicate and link shortcuts', () => {
-  assert.match(boardHelpAlternative(['Cmd', 'D', 'Option', 'drag']) ?? '', /drag/);
-  assert.match(boardHelpAlternative(['Ctrl', 'D', 'Alt', 'drag']) ?? '', /Duplicate/);
+test('board help preserves duplicate and adapts the workspace-owned link shortcut', () => {
+  assert.equal(boardHelpAlternative(['Cmd', 'D', 'Option', 'drag']), null);
+  assert.equal(boardHelpAlternative(['Ctrl', 'D', 'Alt', 'drag']), null);
   assert.match(boardHelpAlternative(['Cmd', 'K']) ?? '', /link control/);
   assert.match(boardHelpAlternative(['Ctrl', 'K']) ?? '', /link control/);
   assert.equal(boardHelpAlternative(['D']), null);
